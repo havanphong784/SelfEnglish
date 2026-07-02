@@ -13,10 +13,12 @@ app.use(express.json());
 const healthRoutes = require('./routes/health');
 const dashboardRoutes = require('./routes/dashboard');
 const vocabularyRoutes = require('./routes/vocabulary');
+const authRoutes = require('./routes/auth');
 
 app.use('/api/health', healthRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/vocabularies', vocabularyRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {

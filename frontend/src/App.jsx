@@ -2,12 +2,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './features/home/Dashboard';
 import Vocabulary from './features/vocabulary/Vocabulary';
+import Landing from './features/auth/Landing';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<DashboardLayout />}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="vocabulary" element={<Vocabulary />} />
           <Route path="listening" element={<div className="p-4">Luyện nghe</div>} />
