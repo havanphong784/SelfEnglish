@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String?
+  streak       Int            @default(0)
+  targetWeekly Int            @default(80)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     StudySession[]
+}
+
+model Vocabulary {
+  id        String   @id @default(uuid())
+  word      String   @unique
+  meaning   String
+  ipa       String?
+  example   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudySession {
+  id              String   @id @default(uuid())
+  userId          String
+  date            DateTime @default(now())
+  durationMinutes Int      @default(0)
+  wordsLearned    Int      @default(0)
+  user            User     @relation(fields: [userId], references: [id])
+}
