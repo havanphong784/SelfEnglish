@@ -19,18 +19,51 @@ model User {
   streak       Int            @default(0)
   targetWeekly Int            @default(80)
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  sessions     StudySession[]
+  updatedAt        DateTime         @updatedAt
+  sessions         StudySession[]
+  userVocabularies UserVocabulary[]
+  reviewHistories  ReviewHistory[]
+}
+
+model VocabularyPackage {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  level       String       @default("All Levels")
+  isPro       Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  vocabularies Vocabulary[]
 }
 
 model Vocabulary {
-  id        String   @id @default(uuid())
-  word      String   @unique
-  meaning   String
-  ipa       String?
-  example   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String           @id @default(uuid())
+  word             String
+  meaning          String
+  ipa              String?
+  example          String?
+  packageId        String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  package          VocabularyPackage? @relation(fields: [packageId], references: [id])
+  userVocabularies UserVocabulary[]
+  reviewHistories  ReviewHistory[]
+}
+
+model UserVocabulary {
+  id           String     @id @default(uuid())
+  userId       String
+  vocabularyId String
+  level        Int        @default(1)
+  nextReview   DateTime   @default(now())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user         User       @relation(fields: [userId], references: [id])
+  vocabulary   Vocabulary @relation(fields: [vocabularyId], references: [id])
+
+  @@unique([userId, vocabularyId])
 }
 
 model StudySession {
@@ -40,4 +73,17 @@ model StudySession {
   durationMinutes Int      @default(0)
   wordsLearned    Int      @default(0)
   user            User     @relation(fields: [userId], references: [id])
+}
+
+model ReviewHistory {
+  id             String   @id @default(uuid())
+  userId         String
+  vocabularyId   String
+  reviewedAt     DateTime @default(now())
+  isCorrect      Boolean
+  previousLevel  Int
+  newLevel       Int
+
+  user           User       @relation(fields: [userId], references: [id])
+  vocabulary     Vocabulary @relation(fields: [vocabularyId], references: [id])
 }

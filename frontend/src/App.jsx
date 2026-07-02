@@ -1,9 +1,13 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './features/home/Dashboard';
-import Vocabulary from './features/vocabulary/Vocabulary';
+import VocabularyDashboard from './features/vocabulary/VocabularyDashboard';
+import StudyController from './features/vocabulary/StudyController';
+import MultipleChoiceStudy from './features/vocabulary/MultipleChoiceStudy';
+import TypingStudy from './features/vocabulary/TypingStudy';
+import PackageDetails from './features/vocabulary/PackageDetails';
+import ImportVocabulary from './features/vocabulary/ImportVocabulary';
 import Landing from './features/auth/Landing';
-
 function App() {
   return (
     <BrowserRouter>
@@ -11,7 +15,12 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="vocabulary" element={<Vocabulary />} />
+          <Route path="vocabulary">
+            <Route index element={<VocabularyDashboard />} />
+            <Route path="study" element={<StudyController />} />
+            <Route path="import" element={<ImportVocabulary />} />
+            <Route path="packages/:packageId" element={<PackageDetails />} />
+          </Route>
           <Route path="listening" element={<div className="p-4">Luyện nghe</div>} />
           <Route path="speaking" element={<div className="p-4">Luyện nói</div>} />
           <Route path="exams" element={<div className="p-4">Luyện đề</div>} />

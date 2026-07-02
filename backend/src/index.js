@@ -21,9 +21,12 @@ app.use('/api/vocabularies', vocabularyRoutes);
 app.use('/api/auth', authRoutes);
 
 // Error Handling Middleware
+const fs = require('fs');
 app.use((err, req, res, next) => {
+  // dummy comment for restart 2
+  fs.appendFileSync('error.log', new Date().toISOString() + '\\n' + err.stack + '\\n\\n');
   console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ error: err.message || 'Something went wrong!' });
 });
 
 app.listen(PORT, () => {

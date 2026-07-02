@@ -57,13 +57,44 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col md:flex-row font-sans">
+      {/* Animated Background Blobs */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+          x: [0, 50, 0],
+          y: [0, 30, 0]
+        }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/30 blur-[150px] pointer-events-none" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
+          x: [0, -40, 0],
+          y: [0, -50, 0]
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent/30 blur-[150px] pointer-events-none" 
+      />
+
       {/* Left side: Hero & Features */}
-      <div className="md:w-1/2 p-12 flex flex-col justify-center items-start space-y-8">
+      <div className="md:w-1/2 p-12 flex flex-col justify-center items-start space-y-8 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-4"
+        >
+          🚀 Nền tảng học tiếng Anh thế hệ mới
+        </motion.div>
+        
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent"
+          transition={{ delay: 0.1 }}
+          className="text-6xl font-bold bg-gradient-to-br from-primary via-accent to-purple-500 bg-clip-text text-transparent font-secondary leading-tight"
         >
           SelfEnglish
         </motion.h1>
@@ -72,83 +103,101 @@ export default function Landing() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-xl text-slate-300"
+          className="text-xl text-muted-foreground max-w-md leading-relaxed"
         >
-          Nền tảng tự học tiếng Anh thông minh với Flashcard 3D và thống kê trực quan.
+          Trải nghiệm phương pháp tự học tiếng Anh thông minh với <strong className="text-primary">Flashcard 3D</strong>, luyện nghe phát âm chuẩn và hệ thống thống kê trực quan.
         </motion.p>
 
-        <div className="space-y-4">
-          <FeatureItem text="✨ Học từ vựng với Flashcard 3D sống động" delay={0.4} />
-          <FeatureItem text="📈 Theo dõi tiến độ qua Activity Chart trực quan" delay={0.5} />
-          <FeatureItem text="🎧 Luyện nghe phát âm chuẩn bằng Web Speech API" delay={0.6} />
+        <div className="space-y-4 w-full max-w-md mt-8">
+          <FeatureItem text="✨ Học từ vựng sinh động với Flashcard 3D" delay={0.4} />
+          <FeatureItem text="📈 Phân tích tiến độ qua Activity Chart trực quan" delay={0.5} />
+          <FeatureItem text="🎧 Luyện nghe & phát âm chuẩn với Web Speech API" delay={0.6} />
         </div>
       </div>
 
       {/* Right side: Login Form */}
-      <div className="md:w-1/2 bg-slate-900 p-12 flex items-center justify-center">
+      <div className="md:w-1/2 p-12 flex items-center justify-center relative z-10">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700"
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="w-full max-w-md glass-panel p-10 rounded-3xl"
         >
-          <h2 className="text-3xl font-semibold mb-6 text-center">
-            {isLogin ? 'Đăng Nhập' : 'Đăng Ký'}
-          </h2>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2 text-foreground font-secondary">
+              {isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản'}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {isLogin ? 'Chào mừng bạn quay trở lại với SelfEnglish' : 'Bắt đầu hành trình chinh phục tiếng Anh'}
+            </p>
+          </div>
           
-          {error && <div className="bg-red-500/10 border border-red-500 text-red-400 p-3 rounded mb-4 text-sm">{error}</div>}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+              className="bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded-xl mb-6 text-sm text-center"
+            >
+              {error}
+            </motion.div>
+          )}
 
-          <form onSubmit={handleEmailAuth} className="space-y-4">
+          <form onSubmit={handleEmailAuth} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Email</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Email</label>
               <input 
                 type="email" 
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all placeholder:text-muted-foreground/50"
+                placeholder="name@example.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Mật khẩu</label>
+              <div className="flex justify-between items-center mb-1.5 ml-1">
+                <label className="block text-sm font-medium text-foreground">Mật khẩu</label>
+                {isLogin && <a href="#" className="text-xs text-primary hover:underline">Quên mật khẩu?</a>}
+              </div>
               <input 
                 type="password" 
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all placeholder:text-muted-foreground/50"
+                placeholder="••••••••"
               />
             </div>
             <button 
               type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors"
+              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5"
             >
               {isLogin ? 'Đăng Nhập' : 'Đăng Ký'}
             </button>
           </form>
 
-          <div className="mt-6 flex items-center">
-            <div className="flex-1 border-t border-slate-700"></div>
-            <span className="px-3 text-slate-500 text-sm">Hoặc</span>
-            <div className="flex-1 border-t border-slate-700"></div>
+          <div className="mt-8 flex items-center">
+            <div className="flex-1 border-t border-border"></div>
+            <span className="px-4 text-muted-foreground text-xs uppercase tracking-wider font-medium">Hoặc tiếp tục với</span>
+            <div className="flex-1 border-t border-border"></div>
           </div>
 
           <button 
             onClick={signInWithGoogle}
-            className="w-full mt-6 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            className="w-full mt-8 bg-card/50 hover:bg-card border border-white/10 text-foreground font-medium py-3 rounded-xl transition-all flex items-center justify-center space-x-3 group"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
             </svg>
-            <span>Tiếp tục với Google</span>
+            <span>Google</span>
           </button>
 
-          <p className="mt-8 text-center text-sm text-slate-400">
+          <p className="mt-8 text-center text-sm text-muted-foreground">
             {isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
             <button 
               onClick={() => setIsLogin(!isLogin)} 
-              className="text-blue-400 hover:underline"
+              className="text-primary font-semibold hover:underline"
             >
-              {isLogin ? 'Đăng ký ngay' : 'Đăng nhập'}
+              {isLogin ? 'Tạo ngay' : 'Đăng nhập'}
             </button>
           </p>
         </motion.div>
@@ -163,9 +212,10 @@ function FeatureItem({ text, delay }) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay }}
-      className="flex items-center space-x-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50"
+      className="flex items-center space-x-4 glass-panel p-4 rounded-2xl hover:-translate-y-1 hover:shadow-primary/10 transition-all cursor-default"
     >
-      <span className="text-lg">{text}</span>
+      <div className="w-2 h-8 rounded-full bg-gradient-to-b from-primary to-accent"></div>
+      <span className="text-foreground font-medium">{text}</span>
     </motion.div>
   );
 }
