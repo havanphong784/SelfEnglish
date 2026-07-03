@@ -155,9 +155,10 @@ const PackageDetails = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b bg-muted/30">
-                <th className="p-4 font-semibold text-muted-foreground w-1/3">Từ vựng</th>
-                <th className="p-4 font-semibold text-muted-foreground w-1/3">Nghĩa</th>
+                <th className="p-4 font-semibold text-muted-foreground w-1/4">Từ vựng</th>
+                <th className="p-4 font-semibold text-muted-foreground w-1/4">Nghĩa</th>
                 <th className="p-4 font-semibold text-muted-foreground text-center">Level</th>
+                <th className="p-4 font-semibold text-muted-foreground text-center">Lịch ôn tiếp</th>
                 <th className="p-4 font-semibold text-muted-foreground text-right">Hành động</th>
               </tr>
             </thead>
@@ -179,6 +180,12 @@ const PackageDetails = () => {
                         Chưa học
                       </span>
                     )}
+                  </td>
+                  <td className="p-4 text-center text-sm text-slate-300">
+                    {w.nextReview ? new Date(w.nextReview).toLocaleDateString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                    }) : '-'}
                   </td>
                   <td className="p-4 text-right">
                     {w.level < 6 && (

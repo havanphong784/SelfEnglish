@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { fetchWithAuth } from '../../utils/api';
 
 import FlashcardStudy from './FlashcardStudy';
@@ -20,8 +21,30 @@ const StudyController = () => {
   const [startTime] = useState(Date.now());
 
   useEffect(() => {
+    const savedSessionStr = sessionStorage.getItem('currentStudySession');
+    if (savedSessionStr) {
+      const savedSession = JSON.parse(savedSessionStr);
+      if (savedSession.packageId === packageId && savedSession.mode === mode) {
+         if (window.confirm("Bạn có phiên học dang dở, muốn tiếp tục không?")) {
+            setWords(savedSession.words);
+            setCurrentIndex(savedSession.currentIndex);
+            setLoading(false);
+            return;
+         } else {
+            sessionStorage.removeItem('currentStudySession');
+         }
+      }
+    }
     loadStudySession();
   }, [packageId, mode]);
+
+  useEffect(() => {
+    if (words.length > 0 && !isFinished) {
+      sessionStorage.setItem('currentStudySession', JSON.stringify({ packageId, mode, currentIndex, words }));
+    } else if (isFinished) {
+      sessionStorage.removeItem('currentStudySession');
+    }
+  }, [currentIndex, words, isFinished, packageId, mode]);
 
   const loadStudySession = async () => {
     try {
@@ -59,8 +82,8 @@ const StudyController = () => {
     try {
       const audio = new Audio(
         type === 'correct' 
-          ? 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=success-1-6297.mp3'
-          : 'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=error-126627.mp3'
+          ? '/sounds/correct.mp3'
+          : '/sounds/error.mp3'
       );
       audio.volume = 0.5;
       audio.play();
@@ -93,6 +116,12 @@ const StudyController = () => {
   const handleMaster = async () => {
     const currentWord = words[currentIndex];
     playSound('correct');
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#f43f5e', '#ec4899', '#8b5cf6']
+    });
     
     if (mode !== 'practice') {
       try {
@@ -181,6 +210,20 @@ const StudyController = () => {
     StudyComponent = TypingStudy;
   }
 
+  const renderLevelDots = () => {
+    return (
+      <div className="flex justify-center gap-1.5 mb-6">
+        {[1, 2, 3, 4, 5, 6].map(lvl => (
+          <div 
+            key={lvl} 
+            className={`w-2.5 h-2.5 rounded-full ${lvl <= currentLevel ? 'bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]' : 'bg-muted'} transition-all duration-300`} 
+            title={`Level ${lvl}`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header & Progress */}
@@ -206,6 +249,7 @@ const StudyController = () => {
 
       {/* Render Sub-Component */}
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" key={currentWord.id}>
+        {renderLevelDots()}
         <StudyComponent 
           word={currentWord} 
           onNext={handleResult} 

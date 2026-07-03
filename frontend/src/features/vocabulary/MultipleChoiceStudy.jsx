@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Crown } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
 
-const MultipleChoiceStudy = ({ word, onNext }) => {
+const MultipleChoiceStudy = ({ word, onNext, onMaster }) => {
   const [options, setOptions] = useState([]);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
@@ -13,8 +13,11 @@ const MultipleChoiceStudy = ({ word, onNext }) => {
   const loadOptions = async () => {
     setSelectedAnswer(null);
     try {
-      // Gọi API lấy đáp án nhiễu
-      const distractors = await fetchWithAuth(`/vocabularies/random?excludeId=${word.id}&limit=3`);
+      let query = `/vocabularies/random?excludeId=${word.id}&limit=3`;
+      if (word.partOfSpeech) query += `&partOfSpeech=${encodeURIComponent(word.partOfSpeech)}`;
+      if (word.synonyms && word.synonyms.length > 0) query += `&excludeSynonyms=${encodeURIComponent(word.synonyms.join(','))}`;
+      
+      const distractors = await fetchWithAuth(query);
       
       let others = Array.isArray(distractors) ? distractors : [];
       
@@ -31,6 +34,18 @@ const MultipleChoiceStudy = ({ word, onNext }) => {
       setOptions(fakeOptions);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (selectedAnswer !== null) return;
+      const key = parseInt(e.key);
+      if (key >= 1 && key <= 4 && options[key - 1]) {
+        handleAnswer(options[key - 1]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [options, selectedAnswer]);
 
   const handleAnswer = (option) => {
     if (selectedAnswer !== null) return;
@@ -78,13 +93,23 @@ const MultipleChoiceStudy = ({ word, onNext }) => {
               className={btnClass}
               disabled={selectedAnswer !== null}
             >
-              <span>{option.meaning}</span>
+              <span><span className="opacity-50 mr-2 font-bold">{idx + 1}.</span> {option.meaning}</span>
               {selectedAnswer !== null && option.id === word.id && <CheckCircle className="text-green-600" />}
               {selectedAnswer !== null && selectedAnswer.id === option.id && option.id !== word.id && <XCircle className="text-red-600" />}
             </button>
           );
         })}
       </div>
+
+      {onMaster && selectedAnswer === null && (
+        <button 
+          onClick={onMaster}
+          className="mt-8 flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 rounded-full font-bold transition-colors text-sm hover:-translate-y-0.5"
+        >
+          <Crown className="w-4 h-4" />
+          Đã thuộc (Bỏ qua mọi cấp độ)
+        </button>
+      )}
     </div>
   );
 };

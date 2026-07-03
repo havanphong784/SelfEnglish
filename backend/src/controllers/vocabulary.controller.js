@@ -68,6 +68,8 @@ exports.getVocabulariesForReview = async (req, res, next) => {
       meaning: uv.vocabulary.meaning,
       ipa: uv.vocabulary.ipa,
       example: uv.vocabulary.example,
+      partOfSpeech: uv.vocabulary.partOfSpeech,
+      synonyms: uv.vocabulary.synonyms,
       level: uv.level, // Level của User đối với từ này
     }));
 
@@ -100,6 +102,8 @@ exports.learnPackage = async (req, res, next) => {
       meaning: v.meaning,
       ipa: v.ipa,
       example: v.example,
+      partOfSpeech: v.partOfSpeech,
+      synonyms: v.synonyms,
       level: 1 // Mới học là level 1
     }));
 
@@ -238,15 +242,60 @@ exports.importVocabularies = async (req, res, next) => {
 // Random vocabularies (distractors for multiple choice)
 exports.getRandomVocabularies = async (req, res, next) => {
   try {
-    const { excludeId, limit = 3 } = req.query;
+    const { excludeId, limit = 3, partOfSpeech, excludeSynonyms } = req.query;
     
-    const words = await prisma.vocabulary.findMany({
-      where: excludeId ? { id: { not: excludeId } } : undefined,
-      take: 50
+    let parsedLimit = parseInt(limit);
+    if (isNaN(parsedLimit) || parsedLimit <= 0) parsedLimit = 3;
+
+    // Phân tích excludeSynonyms nếu có (chuỗi cách nhau bằng dấu phẩy)
+    let synonymsArray = [];
+    if (excludeSynonyms) {
+      synonymsArray = excludeSynonyms.split(',').map(s => s.trim().toLowerCase());
+    }
+
+    // Xây dựng điều kiện query
+    let whereCondition = {};
+    
+    if (excludeId) {
+      whereCondition.id = { not: excludeId };
+    }
+
+    // Ưu tiên lấy cùng loại từ
+    if (partOfSpeech) {
+      whereCondition.partOfSpeech = partOfSpeech;
+    }
+
+    // 1. Lấy tập các từ thoả mãn điều kiện tốt nhất
+    let words = await prisma.vocabulary.findMany({
+      where: whereCondition,
+      take: 100 // Lấy nhiều một chút để lọc synonym
     });
 
+    // Lọc bỏ các từ nằm trong mảng đồng nghĩa
+    if (synonymsArray.length > 0) {
+      words = words.filter(w => !synonymsArray.includes(w.word.toLowerCase()));
+    }
+
+    // 2. Fallback: Nếu không đủ từ, bỏ điều kiện partOfSpeech và lấy thêm
+    if (words.length < parsedLimit) {
+      const fallbackCondition = excludeId ? { id: { not: excludeId } } : undefined;
+      const fallbackWords = await prisma.vocabulary.findMany({
+        where: fallbackCondition,
+        take: 50
+      });
+      
+      // Hợp nhất và loại bỏ trùng lặp
+      const existingIds = new Set(words.map(w => w.id));
+      for (const fw of fallbackWords) {
+        if (!existingIds.has(fw.id) && (!synonymsArray.length || !synonymsArray.includes(fw.word.toLowerCase()))) {
+          words.push(fw);
+          existingIds.add(fw.id);
+        }
+      }
+    }
+
     const shuffled = words.sort(() => 0.5 - Math.random());
-    res.json(shuffled.slice(0, parseInt(limit)));
+    res.json(shuffled.slice(0, parsedLimit));
   } catch (error) {
     next(error);
   }
@@ -450,6 +499,8 @@ exports.getPackageDetails = async (req, res, next) => {
         meaning: v.meaning,
         ipa: v.ipa,
         example: v.example,
+        partOfSpeech: v.partOfSpeech,
+        synonyms: v.synonyms,
         level: userVocab ? userVocab.level : 0,
         nextReview: userVocab ? userVocab.nextReview : null
       };
@@ -499,6 +550,8 @@ exports.practicePackage = async (req, res, next) => {
       meaning: v.meaning,
       ipa: v.ipa,
       example: v.example,
+      partOfSpeech: v.partOfSpeech,
+      synonyms: v.synonyms,
       level: v.userVocabularies[0].level
     }));
 

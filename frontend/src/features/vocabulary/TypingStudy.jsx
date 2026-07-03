@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Crown } from 'lucide-react';
 
-const TypingStudy = ({ word, onNext }) => {
+import { levenshteinDistance } from '../../utils/stringUtils';
+
+const TypingStudy = ({ word, onNext, onMaster }) => {
   const [inputValue, setInputValue] = useState('');
-  const [status, setStatus] = useState('idle'); // idle, correct, incorrect
+  const [status, setStatus] = useState('idle'); // idle, correct, incorrect, typo
   const inputRef = useRef(null);
 
   // Reset khi word thay đổi
@@ -17,24 +19,31 @@ const TypingStudy = ({ word, onNext }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (status !== 'idle') return;
+    if (status !== 'idle' && status !== 'typo') return;
 
-    const isMatch = inputValue.trim().toLowerCase() === word.word.toLowerCase();
+    const inputLower = inputValue.trim().toLowerCase();
+    const targetLower = word.word.toLowerCase();
+    const distance = levenshteinDistance(inputLower, targetLower);
 
-    if (isMatch) {
+    if (distance === 0) {
       setStatus('correct');
       if ('speechSynthesis' in window) {
         const msg = new SpeechSynthesisUtterance(word.word);
         msg.lang = 'en-US';
         window.speechSynthesis.speak(msg);
       }
+      setTimeout(() => {
+        onNext(true);
+      }, 2000);
+    } else if (distance === 1 || (targetLower.length > 5 && distance === 2)) {
+      setStatus('typo');
+      // Không gọi onNext, cho phép user gõ lại
     } else {
       setStatus('incorrect');
+      setTimeout(() => {
+        onNext(false);
+      }, 2000);
     }
-
-    setTimeout(() => {
-      onNext(isMatch);
-    }, 2000);
   };
 
   return (
@@ -54,6 +63,7 @@ const TypingStudy = ({ word, onNext }) => {
           className={`w-full text-center text-3xl p-5 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all shadow-sm
             ${status === 'idle' ? 'border-primary/50 focus:border-primary focus:ring-primary/20 bg-card' : 
               status === 'correct' ? 'border-green-500 bg-green-500/10 text-green-700' : 
+              status === 'typo' ? 'border-yellow-500 bg-yellow-500/10 text-yellow-700 focus:ring-yellow-500/20' :
               'border-red-500 bg-red-500/10 text-red-700'}`}
           placeholder="Gõ từ vào đây..."
         />
@@ -69,13 +79,19 @@ const TypingStudy = ({ word, onNext }) => {
           </div>
         )}
         
-        {status === 'idle' && (
+        {(status === 'idle' || status === 'typo') && (
           <button 
             type="submit" 
             className="mt-8 w-full py-4 bg-primary text-primary-foreground font-bold rounded-2xl hover:bg-primary/90 hover:scale-[1.02] transition-all shadow-md"
           >
             Kiểm tra
           </button>
+        )}
+
+        {status === 'typo' && (
+          <div className="mt-8 p-5 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl text-yellow-700 font-medium animate-in slide-in-from-bottom-4">
+            Gần đúng rồi! Chú ý chính tả nhé.
+          </div>
         )}
 
         {status === 'incorrect' && (
@@ -89,6 +105,16 @@ const TypingStudy = ({ word, onNext }) => {
           </div>
         )}
       </form>
+
+      {(status === 'idle' || status === 'typo') && onMaster && (
+        <button 
+          onClick={onMaster}
+          className="mt-8 flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 rounded-full font-bold transition-colors text-sm hover:-translate-y-0.5"
+        >
+          <Crown className="w-4 h-4" />
+          Đã thuộc (Bỏ qua mọi cấp độ)
+        </button>
+      )}
     </div>
   );
 };
