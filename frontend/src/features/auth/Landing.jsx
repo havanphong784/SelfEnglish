@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../../config/firebase';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
-import axios from 'axios';
+import { API_BASE_URL } from '../../utils/api';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -17,11 +17,20 @@ export default function Landing() {
       const idToken = await result.user.getIdToken();
       
       // Gửi token lên backend để xác thực và lấy thông tin User
-      const response = await axios.post('http://localhost:5000/api/auth/verify', { idToken });
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+      const data = await response.json();
       
-      if (response.data.user) {
+      if (!response.ok) {
+        throw new Error(data.error || 'Dang nhap that bai');
+      }
+
+      if (data.user) {
         // Lưu token hoặc thông tin user vào localStorage/Context
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       }
     } catch (err) {
@@ -81,11 +90,11 @@ export default function Landing() {
       />
 
       {/* Left side: Hero & Features */}
-      <div className="md:w-1/2 p-12 flex flex-col justify-center items-start space-y-8 relative z-10">
+      <div className="md:w-1/2 p-6 md:p-12 flex flex-col justify-center items-start space-y-6 md:space-y-8 relative z-10 mt-10 md:mt-0">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-4"
+          className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-xs md:text-sm mb-2 md:mb-4 shadow-sm"
         >
           🚀 Nền tảng học tiếng Anh thế hệ mới
         </motion.div>
@@ -94,7 +103,7 @@ export default function Landing() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-6xl font-bold bg-gradient-to-br from-primary via-accent to-purple-500 bg-clip-text text-transparent font-secondary leading-tight"
+          className="text-4xl md:text-6xl font-bold bg-gradient-to-br from-primary via-accent to-purple-500 bg-clip-text text-transparent font-secondary leading-tight"
         >
           SelfEnglish
         </motion.h1>
@@ -103,12 +112,12 @@ export default function Landing() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-xl text-muted-foreground max-w-md leading-relaxed"
+          className="text-base md:text-xl text-muted-foreground max-w-md leading-relaxed"
         >
           Trải nghiệm phương pháp tự học tiếng Anh thông minh với <strong className="text-primary">Flashcard 3D</strong>, luyện nghe phát âm chuẩn và hệ thống thống kê trực quan.
         </motion.p>
 
-        <div className="space-y-4 w-full max-w-md mt-8">
+        <div className="space-y-3 md:space-y-4 w-full max-w-md mt-6 md:mt-8">
           <FeatureItem text="✨ Học từ vựng sinh động với Flashcard 3D" delay={0.4} />
           <FeatureItem text="📈 Phân tích tiến độ qua Activity Chart trực quan" delay={0.5} />
           <FeatureItem text="🎧 Luyện nghe & phát âm chuẩn với Web Speech API" delay={0.6} />
@@ -116,12 +125,12 @@ export default function Landing() {
       </div>
 
       {/* Right side: Login Form */}
-      <div className="md:w-1/2 p-12 flex items-center justify-center relative z-10">
+      <div className="md:w-1/2 p-6 md:p-12 flex items-center justify-center relative z-10 mb-10 md:mb-0">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="w-full max-w-md glass-panel p-10 rounded-3xl"
+          className="w-full max-w-md glass-panel p-6 md:p-10 rounded-3xl"
         >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-2 text-foreground font-secondary">

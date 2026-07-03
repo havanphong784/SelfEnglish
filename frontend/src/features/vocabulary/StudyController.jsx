@@ -92,8 +92,10 @@ const StudyController = () => {
     }
   };
 
-  const handleResult = async (isCorrect) => {
+  const handleResult = async (result) => {
     const currentWord = words[currentIndex];
+    const rating = typeof result === 'object' ? result.rating : null;
+    const isCorrect = rating ? rating !== 'again' : Boolean(result);
     
     // Phát âm thanh đúng sai
     playSound(isCorrect ? 'correct' : 'incorrect');
@@ -103,7 +105,7 @@ const StudyController = () => {
       try {
         await fetchWithAuth(`/vocabularies/${currentWord.id}/review`, {
           method: 'POST',
-          body: JSON.stringify({ isCorrect })
+          body: JSON.stringify(rating ? { rating } : { isCorrect })
         });
       } catch (err) {
         console.error('Lỗi khi lưu kết quả:', err);

@@ -1,6 +1,6 @@
 import { auth } from '../config/firebase';
 
-const BASE_URL = 'http://localhost:5000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 export const fetchWithAuth = async (endpoint, options = {}) => {
   // Đợi Firebase Auth khởi tạo
@@ -22,7 +22,7 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
   });

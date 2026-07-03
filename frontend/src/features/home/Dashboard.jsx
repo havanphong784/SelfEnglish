@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ArrowUpRight, ArrowDownRight, Download, ChevronDown
 } from 'lucide-react';
+import { fetchWithAuth } from '../../utils/api';
 import { 
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
   PieChart, Pie, Cell, BarChart, Bar, ComposedChart
@@ -10,59 +12,74 @@ import {
 // --- Components ---
 
 const StatGaugeIcon = ({ color, isUp }) => (
-  <div className="relative w-12 h-12 flex items-center justify-center">
-    <svg className="w-full h-full transform -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+  <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+    <div className="absolute inset-0 rounded-full opacity-30 blur-md" style={{ backgroundColor: color }}></div>
+    <svg className="w-full h-full transform -rotate-90 absolute inset-0 drop-shadow-sm" viewBox="0 0 36 36">
       <path
-        className="text-muted/50"
-        strokeWidth="3"
+        className="text-muted/40"
+        strokeWidth="3.5"
         stroke="currentColor"
         fill="none"
         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
       />
       <path
         stroke={color}
-        strokeWidth="3"
+        strokeWidth="3.5"
         strokeDasharray="75, 100"
         strokeLinecap="round"
         fill="none"
+        className="drop-shadow-md"
         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
       />
     </svg>
-    <div className="bg-white rounded-full p-1.5 shadow-sm relative z-10" style={{ color: color }}>
-      {isUp ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+    <div className="bg-white rounded-full p-2 shadow-sm relative z-10" style={{ color: color }}>
+      {isUp ? <ArrowUpRight className="w-4 h-4 stroke-[3]" /> : <ArrowDownRight className="w-4 h-4 stroke-[3]" />}
     </div>
   </div>
 );
 
 const SoftStatCard = ({ title, value, color, isUp, delay }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
     transition={{ delay, duration: 0.5 }}
-    className="bg-white rounded-3xl p-5 flex items-center gap-4 soft-shadow"
+    className="bg-white rounded-[2rem] p-5 md:p-6 flex flex-col justify-between soft-shadow hover:soft-shadow-primary hover:-translate-y-1 transition-all cursor-pointer border border-border/50 group relative overflow-hidden"
   >
-    <StatGaugeIcon color={color} isUp={isUp} />
-    <div>
-      <h3 className="text-2xl font-bold text-foreground font-secondary leading-none mb-1">{value}</h3>
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
+    <div className="absolute top-0 right-0 w-32 h-32 opacity-10 rounded-bl-[100px] -z-10 group-hover:scale-150 transition-transform duration-700" style={{ backgroundColor: color }}></div>
+    <div className="absolute bottom-0 left-0 w-24 h-24 opacity-5 rounded-tr-full -z-10 group-hover:scale-150 transition-transform duration-700" style={{ backgroundColor: color }}></div>
+    
+    <div className="flex justify-between items-start mb-4">
+      <div className="shrink-0 group-hover:drop-shadow-xl transition-all">
+        <StatGaugeIcon color={color} isUp={isUp} />
+      </div>
+      <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-0.5 shadow-sm ${isUp ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+        {isUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+        <span>{isUp ? '+12%' : '-4%'}</span>
+      </div>
+    </div>
+    <div className="text-left mt-auto">
+      <h3 className="text-3xl md:text-4xl font-black text-foreground font-secondary tracking-tight mb-1">{value}</h3>
+      <p className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
     </div>
   </motion.div>
 );
 
 const ProgressBar = ({ label, percentage, color }) => (
-  <div className="mb-5">
+  <div className="mb-5 group">
     <div className="flex justify-between text-sm font-semibold mb-2">
-      <span className="text-foreground">{label}</span>
-      <span className="text-muted-foreground">{percentage}%</span>
+      <span className="text-foreground group-hover:text-primary transition-colors">{label}</span>
+      <span className="font-bold" style={{ color }}>{percentage}%</span>
     </div>
-    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+    <div className="w-full h-3 bg-muted/50 rounded-full overflow-hidden shadow-inner p-[1px]">
       <motion.div 
         initial={{ width: 0 }}
         animate={{ width: `${percentage}%` }}
-        transition={{ duration: 1, delay: 0.2 }}
-        className="h-full rounded-full"
+        transition={{ duration: 1.5, delay: 0.2, type: 'spring' }}
+        className="h-full rounded-full relative"
         style={{ backgroundColor: color }}
-      />
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_infinite]"></div>
+      </motion.div>
     </div>
   </div>
 );
@@ -79,7 +96,7 @@ const frequencyData = [
   { year: 'CN', blue: 50, orange: 60 },
 ];
 
-const newWordsData = [
+const mockNewWordsData = [
   { day: '2010', count: 40, trend: 50 },
   { day: '2011', count: 60, trend: 60 },
   { day: '2012', count: 30, trend: 40 },
@@ -91,6 +108,47 @@ const newWordsData = [
 ];
 
 const Dashboard = () => {
+  const [stats, setStats] = useState({
+    learnedWords: 0,
+    streak: 0,
+    newWordsData: mockNewWordsData
+  });
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const vocabStats = await fetchWithAuth('/vocabularies/stats');
+        const dashStats = await fetchWithAuth('/dashboard/stats');
+        
+        let learnedCount = 0;
+        if (vocabStats && vocabStats.levelDistribution) {
+          learnedCount = Object.values(vocabStats.levelDistribution).reduce((sum, val) => sum + val, 0);
+        }
+
+        let newWordsData = mockNewWordsData;
+        if (dashStats && dashStats.stats && dashStats.stats.recentSessions && dashStats.stats.recentSessions.length > 0) {
+          newWordsData = dashStats.stats.recentSessions.map(session => {
+            const d = new Date(session.date);
+            return {
+              day: `${d.getDate()}/${d.getMonth()+1}`,
+              count: session.wordsLearned,
+              trend: session.wordsLearned + Math.floor(Math.random() * 10)
+            };
+          });
+        }
+
+        setStats({
+          learnedWords: learnedCount,
+          streak: vocabStats?.streak || dashStats?.user?.streak || 0,
+          newWordsData
+        });
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
+
   return (
     <div className="space-y-6 pt-4 pb-12">
       
@@ -102,10 +160,10 @@ const Dashboard = () => {
       </div>
 
       {/* Top Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-        <SoftStatCard title="Từ vựng" value="348" color="#FF7C53" isUp={true} delay={0.1} />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-8">
+        <SoftStatCard title="Từ vựng" value={stats.learnedWords.toString()} color="#FF7C53" isUp={true} delay={0.1} />
         <SoftStatCard title="Bài học" value="128" color="#45B2E8" isUp={false} delay={0.2} />
-        <SoftStatCard title="Chuỗi ngày" value="10" color="#F7B731" isUp={true} delay={0.3} />
+        <SoftStatCard title="Chuỗi ngày" value={stats.streak.toString()} color="#F7B731" isUp={true} delay={0.3} />
         <SoftStatCard title="Thời gian" value="34h" color="#20BF6B" isUp={false} delay={0.4} />
         <SoftStatCard title="Điểm thi" value="880" color="#8854D0" isUp={true} delay={0.5} />
       </div>
@@ -259,7 +317,7 @@ const Dashboard = () => {
           
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={newWordsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <ComposedChart data={stats.newWordsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#4318FF" stopOpacity={0.8}/>

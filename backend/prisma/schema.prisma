@@ -12,60 +12,68 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  firebaseUid  String?        @unique
-  email        String         @unique
-  name         String?
-  streak       Int            @default(0)
-  targetWeekly Int            @default(80)
-  createdAt    DateTime       @default(now())
-  updatedAt        DateTime         @updatedAt
+  id               String              @id @default(uuid())
+  firebaseUid      String?             @unique
+  email            String              @unique
+  name             String?
+  streak           Int                 @default(0)
+  targetWeekly     Int                 @default(80)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
   sessions         StudySession[]
   userVocabularies UserVocabulary[]
   reviewHistories  ReviewHistory[]
+  packages         VocabularyPackage[] @relation("OwnedVocabularyPackages")
 }
 
 model VocabularyPackage {
-  id          String       @id @default(uuid())
-  title       String
-  description String?
-  level       String       @default("All Levels")
-  isPro       Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id           String       @id @default(uuid())
+  title        String
+  description  String?
+  level        String       @default("All Levels")
+  isPro        Boolean      @default(false)
+  ownerId      String?
+  visibility   String       @default("system")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  owner        User?        @relation("OwnedVocabularyPackages", fields: [ownerId], references: [id], onDelete: SetNull)
   vocabularies Vocabulary[]
+
+  @@index([ownerId])
+  @@index([visibility])
 }
 
 model Vocabulary {
-  id               String           @id @default(uuid())
-  word             String
-  meaning          String
-  ipa              String?
-  example          String?
-  partOfSpeech     String?
-  synonyms         String[]
-  packageId        String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  
+  id           String   @id @default(uuid())
+  word         String
+  meaning      String
+  ipa          String?
+  example      String?
+  partOfSpeech String?
+  synonyms     String[]
+  packageId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
   package          VocabularyPackage? @relation(fields: [packageId], references: [id])
   userVocabularies UserVocabulary[]
   reviewHistories  ReviewHistory[]
 }
 
 model UserVocabulary {
-  id           String     @id @default(uuid())
+  id           String   @id @default(uuid())
   userId       String
   vocabularyId String
-  level        Int        @default(1)
-  nextReview   DateTime   @default(now())
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  level        Int      @default(1)
+  nextReview   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  user         User       @relation(fields: [userId], references: [id])
-  vocabulary   Vocabulary @relation(fields: [vocabularyId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id])
 
   @@unique([userId, vocabularyId])
+  @@index([userId, nextReview])
 }
 
 model StudySession {
@@ -75,17 +83,21 @@ model StudySession {
   durationMinutes Int      @default(0)
   wordsLearned    Int      @default(0)
   user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, date])
 }
 
 model ReviewHistory {
-  id             String   @id @default(uuid())
-  userId         String
-  vocabularyId   String
-  reviewedAt     DateTime @default(now())
-  isCorrect      Boolean
-  previousLevel  Int
-  newLevel       Int
+  id            String   @id @default(uuid())
+  userId        String
+  vocabularyId  String
+  reviewedAt    DateTime @default(now())
+  isCorrect     Boolean
+  previousLevel Int
+  newLevel      Int
 
-  user           User       @relation(fields: [userId], references: [id])
-  vocabulary     Vocabulary @relation(fields: [vocabularyId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id])
+
+  @@index([userId, reviewedAt])
 }
