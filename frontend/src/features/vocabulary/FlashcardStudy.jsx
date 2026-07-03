@@ -65,7 +65,7 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
   if (!word) return null;
 
   const englishSide = (
-    <div className="absolute inset-0 bg-card border-2 border-border rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+    <div className="absolute inset-0 bg-white border border-border rounded-[2rem] p-8 flex flex-col items-center justify-center [backface-visibility:hidden] soft-shadow">
       <button 
         onClick={(e) => playAudio(e, word.word)}
         className="absolute top-6 right-6 p-4 rounded-full bg-primary/5 hover:bg-primary/20 text-primary transition-colors"
@@ -101,7 +101,7 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
   );
 
   const vietnameseSide = (
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/30 rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden] shadow-[0_8px_30px_rgba(var(--primary),0.1)]" style={{ transform: 'rotateY(180deg)' }}>
+    <div className="absolute inset-0 bg-white border border-primary/20 rounded-[2rem] p-8 flex flex-col items-center justify-center [backface-visibility:hidden] soft-shadow-primary" style={{ transform: 'rotateY(180deg)' }}>
       <h3 className="text-3xl md:text-5xl font-bold text-primary mb-8 text-center leading-tight">
         {word.meaning}
       </h3>
@@ -127,7 +127,7 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
   );
 
   const frontContent = reverseMode ? (
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary/30 rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden] shadow-[0_8px_30px_rgba(var(--primary),0.1)]">
+    <div className="absolute inset-0 bg-white border border-primary/20 rounded-[2rem] p-8 flex flex-col items-center justify-center [backface-visibility:hidden] soft-shadow-primary">
       <h3 className="text-3xl md:text-5xl font-bold text-primary mb-8 text-center leading-tight">
         {word.meaning}
       </h3>
@@ -152,7 +152,7 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
   );
 
   const backContent = reverseMode ? (
-    <div className="absolute inset-0 bg-card border-2 border-border rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden] shadow-[0_8px_30px_rgb(0,0,0,0.04)]" style={{ transform: 'rotateY(180deg)' }}>
+    <div className="absolute inset-0 bg-white border border-border rounded-[2rem] p-8 flex flex-col items-center justify-center [backface-visibility:hidden] soft-shadow" style={{ transform: 'rotateY(180deg)' }}>
        <button 
         onClick={(e) => playAudio(e, word.word)}
         className="absolute top-6 right-6 p-4 rounded-full bg-primary/5 hover:bg-primary/20 text-primary transition-colors"

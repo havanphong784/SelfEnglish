@@ -179,7 +179,7 @@ const StudyController = () => {
 
   if (isFinished) {
     return (
-      <div className="max-w-xl mx-auto mt-20 text-center space-y-6 bg-card border rounded-3xl p-12">
+      <div className="max-w-xl mx-auto mt-20 text-center space-y-6 bg-white rounded-[2rem] p-12 soft-shadow border border-border">
         <div className="w-24 h-24 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle className="w-12 h-12" />
         </div>

@@ -1,92 +1,287 @@
 import { motion } from 'framer-motion';
-import { Flame, BookOpen, Clock, Target } from 'lucide-react';
-import ActivityChart from './ActivityChart';
-import StatisticsChart from './StatisticsChart';
+import { 
+  ArrowUpRight, ArrowDownRight, Download, ChevronDown
+} from 'lucide-react';
+import { 
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
+  PieChart, Pie, Cell, BarChart, Bar, ComposedChart
+} from 'recharts';
 
-const StatCard = ({ title, value, icon: Icon, colorClass, delay }) => (
+// --- Components ---
+
+const StatGaugeIcon = ({ color, isUp }) => (
+  <div className="relative w-12 h-12 flex items-center justify-center">
+    <svg className="w-full h-full transform -rotate-90 absolute inset-0" viewBox="0 0 36 36">
+      <path
+        className="text-muted/50"
+        strokeWidth="3"
+        stroke="currentColor"
+        fill="none"
+        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+      />
+      <path
+        stroke={color}
+        strokeWidth="3"
+        strokeDasharray="75, 100"
+        strokeLinecap="round"
+        fill="none"
+        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+      />
+    </svg>
+    <div className="bg-white rounded-full p-1.5 shadow-sm relative z-10" style={{ color: color }}>
+      {isUp ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+    </div>
+  </div>
+);
+
+const SoftStatCard = ({ title, value, color, isUp, delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5 }}
-    className="glass-panel p-6 rounded-2xl flex items-center gap-5 group hover:shadow-primary/10 transition-all duration-300 relative overflow-hidden"
+    className="bg-white rounded-3xl p-5 flex items-center gap-4 soft-shadow"
   >
-    {/* Background highlight on hover */}
-    <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 ${colorClass.split(' ')[0]}`} />
-    
-    <div className={`p-4 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3 ${colorClass}`}>
-      <Icon className="w-7 h-7" />
-    </div>
+    <StatGaugeIcon color={color} isUp={isUp} />
     <div>
-      <p className="text-sm text-muted-foreground font-medium mb-1">{title}</p>
-      <h3 className="text-3xl font-bold text-foreground font-secondary">{value}</h3>
+      <h3 className="text-2xl font-bold text-foreground font-secondary leading-none mb-1">{value}</h3>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
     </div>
   </motion.div>
 );
 
+const ProgressBar = ({ label, percentage, color }) => (
+  <div className="mb-5">
+    <div className="flex justify-between text-sm font-semibold mb-2">
+      <span className="text-foreground">{label}</span>
+      <span className="text-muted-foreground">{percentage}%</span>
+    </div>
+    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+      <motion.div 
+        initial={{ width: 0 }}
+        animate={{ width: `${percentage}%` }}
+        transition={{ duration: 1, delay: 0.2 }}
+        className="h-full rounded-full"
+        style={{ backgroundColor: color }}
+      />
+    </div>
+  </div>
+);
+
+// --- Mock Data ---
+
+const frequencyData = [
+  { year: 'T2', blue: 30, orange: 20 },
+  { year: 'T3', blue: 45, orange: 30 },
+  { year: 'T4', blue: 25, orange: 40 },
+  { year: 'T5', blue: 60, orange: 50 },
+  { year: 'T6', blue: 40, orange: 70 },
+  { year: 'T7', blue: 80, orange: 40 },
+  { year: 'CN', blue: 50, orange: 60 },
+];
+
+const newWordsData = [
+  { day: '2010', count: 40, trend: 50 },
+  { day: '2011', count: 60, trend: 60 },
+  { day: '2012', count: 30, trend: 40 },
+  { day: '2013', count: 70, trend: 55 },
+  { day: '2014', count: 90, trend: 65 },
+  { day: '2015', count: 50, trend: 50 },
+  { day: '2016', count: 30, trend: 40 },
+  { day: '2017', count: 80, trend: 70 },
+];
+
 const Dashboard = () => {
   return (
-    <div className="space-y-8 pb-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-bold text-foreground font-secondary bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-          Tổng quan
-        </h1>
+    <div className="space-y-6 pt-4 pb-12">
+      
+      {/* Top Controls & Button */}
+      <div className="flex justify-end mb-2">
+        <button className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold soft-shadow transition-colors">
+          + Thêm Mục Tiêu
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Chuỗi ngày học" 
-          value="15 ngày" 
-          icon={Flame} 
-          colorClass="bg-orange-500/20 text-orange-500"
-          delay={0.1}
-        />
-        <StatCard 
-          title="Từ vựng đã học" 
-          value="248 từ" 
-          icon={BookOpen} 
-          colorClass="bg-primary/20 text-primary"
-          delay={0.2}
-        />
-        <StatCard 
-          title="Thời gian học" 
-          value="34 giờ" 
-          icon={Clock} 
-          colorClass="bg-emerald-500/20 text-emerald-500"
-          delay={0.3}
-        />
-        <StatCard 
-          title="Mục tiêu tuần" 
-          value="85%" 
-          icon={Target} 
-          colorClass="bg-accent/20 text-accent"
-          delay={0.4}
-        />
+      {/* Top Stat Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+        <SoftStatCard title="Từ vựng" value="348" color="#FF7C53" isUp={true} delay={0.1} />
+        <SoftStatCard title="Bài học" value="128" color="#45B2E8" isUp={false} delay={0.2} />
+        <SoftStatCard title="Chuỗi ngày" value="10" color="#F7B731" isUp={true} delay={0.3} />
+        <SoftStatCard title="Thời gian" value="34h" color="#20BF6B" isUp={false} delay={0.4} />
+        <SoftStatCard title="Điểm thi" value="880" color="#8854D0" isUp={true} delay={0.5} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="glass-panel p-6 rounded-3xl h-[400px] flex flex-col"
-        >
-          <h3 className="text-lg font-bold mb-4 font-secondary">Hoạt động học tập</h3>
-          <div className="flex-1 min-h-0">
-            <ActivityChart />
-          </div>
-        </motion.div>
+      {/* Middle Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="glass-panel p-6 rounded-3xl h-[400px] flex flex-col"
-        >
-          <h3 className="text-lg font-bold mb-4 font-secondary">Thống kê điểm số</h3>
-          <div className="flex-1 min-h-0">
-            <StatisticsChart />
+        {/* Line Chart */}
+        <div className="lg:col-span-2 bg-white rounded-[2rem] p-6 soft-shadow relative">
+          <div className="flex items-center justify-between mb-8">
+            <button className="flex items-center gap-2 text-sm font-bold text-foreground hover:bg-muted px-3 py-1.5 rounded-xl transition-colors">
+              Tần suất học tập <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <p className="text-xs font-bold text-foreground">Tuần này</p>
+                <p className="text-[10px] text-muted-foreground">Nghe: 24h Đọc: 12h</p>
+              </div>
+              <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-xl">
+                <span className="text-xs font-semibold text-muted-foreground">Lọc theo</span>
+                <span className="text-xs font-bold text-foreground flex items-center">Tuần <ChevronDown className="w-3 h-3 ml-1" /></span>
+              </div>
+              <button className="p-2 border border-border rounded-xl hover:bg-muted transition-colors text-muted-foreground">
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </motion.div>
+          
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={frequencyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <filter id="shadowBlue" height="200%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="10" floodColor="#4318FF" floodOpacity="0.2"/>
+                  </filter>
+                  <filter id="shadowOrange" height="200%">
+                    <feDropShadow dx="0" dy="10" stdDeviation="10" floodColor="#FF7C53" floodOpacity="0.2"/>
+                  </filter>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} />
+                <Tooltip cursor={{ stroke: 'var(--color-border)', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                <Line type="monotone" dataKey="blue" stroke="#4318FF" strokeWidth={4} dot={false} filter="url(#shadowBlue)" />
+                <Line type="monotone" dataKey="orange" stroke="#FF7C53" strokeWidth={4} dot={{ r: 6, strokeWidth: 4, fill: '#fff' }} filter="url(#shadowOrange)" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Half Donut Chart */}
+        <div className="bg-white rounded-[2rem] p-6 soft-shadow flex flex-col relative">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-sm font-bold text-foreground">Hoàn thành mục tiêu</h3>
+            <button className="p-2 border border-border rounded-xl hover:bg-muted transition-colors text-muted-foreground">
+              <Download className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="flex-1 flex flex-col items-center justify-center relative mt-4">
+            <div className="h-[180px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <defs>
+                    <linearGradient id="colorOrange" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#FF7C53" />
+                      <stop offset="100%" stopColor="#FFD3A5" />
+                    </linearGradient>
+                    <filter id="pieShadow" height="200%">
+                      <feDropShadow dx="0" dy="15" stdDeviation="15" floodColor="#FF7C53" floodOpacity="0.3"/>
+                    </filter>
+                  </defs>
+                  <Pie
+                    data={[{ value: 74 }, { value: 26 }]}
+                    cx="50%"
+                    cy="100%"
+                    startAngle={180}
+                    endAngle={0}
+                    innerRadius="70%"
+                    outerRadius="100%"
+                    dataKey="value"
+                    stroke="none"
+                    cornerRadius={10}
+                  >
+                    <Cell fill="url(#colorOrange)" filter="url(#pieShadow)" />
+                    <Cell fill="var(--color-muted)" />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="absolute bottom-4 flex flex-col items-center">
+              <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 mb-2">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                </svg>
+              </div>
+              <span className="text-4xl font-bold font-secondary text-foreground">74%</span>
+            </div>
+            
+            <div className="w-full flex justify-between px-8 absolute bottom-0 translate-y-6">
+              <span className="text-xs font-bold text-muted-foreground">0%</span>
+              <span className="text-xs font-bold text-muted-foreground">100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Progress Bars */}
+        <div className="bg-white rounded-[2rem] p-6 soft-shadow relative">
+           <div className="flex items-center justify-between mb-8">
+            <h3 className="text-sm font-bold text-foreground">Tiến độ kỹ năng</h3>
+            <button className="p-2 border border-border rounded-xl hover:bg-muted transition-colors text-muted-foreground">
+              <Download className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="mt-6">
+            <ProgressBar label="Kỹ năng Nghe" percentage={65} color="#FF7C53" />
+            <ProgressBar label="Kỹ năng Nói" percentage={84} color="#45B2E8" />
+            <ProgressBar label="Kỹ năng Đọc" percentage={28} color="#20BF6B" />
+            <ProgressBar label="Kỹ năng Viết" percentage={16} color="#8854D0" />
+          </div>
+        </div>
+
+        {/* Bar + Line Chart */}
+        <div className="lg:col-span-2 bg-white rounded-[2rem] p-6 soft-shadow relative">
+          <div className="flex items-center justify-between mb-8">
+            <button className="flex items-center gap-2 text-sm font-bold text-foreground hover:bg-muted px-3 py-1.5 rounded-xl transition-colors">
+              Từ vựng mới <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="bg-orange-50 px-3 py-1 rounded-xl border border-orange-100 flex flex-col">
+                <span className="text-[10px] font-bold text-foreground">Tuần này</span>
+                <span className="text-xs text-orange-500 font-bold flex items-center">
+                  <ArrowUpRight className="w-3 h-3 mr-1" /> 28%
+                </span>
+              </div>
+              <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-xl">
+                <span className="text-xs font-semibold text-muted-foreground">Lọc theo</span>
+                <span className="text-xs font-bold text-foreground flex items-center">Ngày <ChevronDown className="w-3 h-3 ml-1" /></span>
+              </div>
+              <button className="p-2 border border-border rounded-xl hover:bg-muted transition-colors text-muted-foreground">
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={newWordsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#4318FF" stopOpacity={0.8}/>
+                    <stop offset="100%" stopColor="#4318FF" stopOpacity={0.1}/>
+                  </linearGradient>
+                  <linearGradient id="barOrange" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF7C53" stopOpacity={0.8}/>
+                    <stop offset="100%" stopColor="#FF7C53" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} />
+                <Tooltip cursor={{fill: 'transparent'}} />
+                {/* We use two bars to alternate colors based on data or just use one for simplicity */}
+                <Bar dataKey="count" fill="url(#barBlue)" radius={[10, 10, 10, 10]} barSize={20} />
+                <Line type="monotone" dataKey="trend" stroke="#94A3B8" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 6, fill: '#FF7C53', stroke: '#fff', strokeWidth: 3 }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </div>
     </div>
   );

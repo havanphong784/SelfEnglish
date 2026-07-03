@@ -1,55 +1,62 @@
-import { Link } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Headphones, Mic, CheckSquare, BarChart } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { LayoutDashboard, BookOpen, Headphones, Mic, CheckSquare, BarChart, Settings, Users } from 'lucide-react';
+import { cn } from '../lib/utils';
+import { motion } from 'framer-motion';
 
 const Sidebar = () => {
+  const location = useLocation();
+  
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: BookOpen, label: 'Học từ vựng', path: '/dashboard/vocabulary' },
-    { icon: Headphones, label: 'Luyện nghe', path: '/dashboard/listening' },
-    { icon: Mic, label: 'Luyện nói', path: '/dashboard/speaking' },
-    { icon: CheckSquare, label: 'Luyện đề', path: '/dashboard/exams' },
-    { icon: BarChart, label: 'Thống kê', path: '/dashboard/statistics' },
+    { icon: LayoutDashboard, path: '/dashboard' },
+    { icon: BookOpen, path: '/dashboard/vocabulary' },
+    { icon: Headphones, path: '/dashboard/listening' },
+    { icon: Mic, path: '/dashboard/speaking' },
+    { icon: CheckSquare, path: '/dashboard/exams' },
+    { icon: BarChart, path: '/dashboard/statistics' },
+    { icon: Users, path: '/dashboard/community' },
+    { icon: Settings, path: '/dashboard/settings' },
   ];
 
   return (
-    <aside className="w-64 flex flex-col h-full rounded-2xl glass-panel relative overflow-hidden transition-all duration-300">
-      {/* Decorative gradient inside sidebar */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+    <aside className="w-[100px] bg-white h-full relative z-20 flex flex-col items-center py-8 rounded-r-[2rem] soft-shadow">
       
-      <div className="p-6 relative z-10">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent flex items-center gap-2 font-secondary">
-          <BookOpen className="w-8 h-8 text-primary" />
-          SelfEnglish
-        </h1>
+      {/* Logo */}
+      <div className="mb-12 relative group cursor-pointer flex flex-col items-center">
+        <div className="w-12 h-12 bg-gradient-to-tr from-primary to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-primary/30 shadow-lg mb-1">
+          <BookOpen className="w-6 h-6" />
+        </div>
+        <span className="text-[10px] font-bold text-foreground">SelfEnglish</span>
       </div>
       
-      <nav className="flex-1 px-4 py-4 space-y-2 relative z-10">
-        {menuItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className="group flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all duration-300 relative overflow-hidden"
-          >
-            {/* Background highlight on hover */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            <item.icon className="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
-            <span className="font-medium relative z-10">{item.label}</span>
-          </Link>
-        ))}
+      {/* Navigation */}
+      <nav className="flex flex-col gap-4 w-full px-4">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className="relative flex items-center justify-center w-full aspect-square rounded-2xl group transition-all"
+            >
+              {isActive && (
+                <motion.div 
+                  layoutId="sidebar-active"
+                  className="absolute inset-0 bg-primary rounded-2xl soft-shadow-primary"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <item.icon 
+                className={cn(
+                  "w-6 h-6 relative z-10 transition-colors duration-300", 
+                  isActive ? "text-white" : "text-muted-foreground group-hover:text-primary"
+                )} 
+              />
+            </Link>
+          );
+        })}
       </nav>
       
-      <div className="p-4 relative z-10">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-card/40 border border-white/5 backdrop-blur-md hover:bg-card/60 transition-colors cursor-pointer">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold shadow-lg">
-            U
-          </div>
-          <div>
-            <p className="text-sm font-bold text-foreground">User</p>
-            <p className="text-xs text-primary font-medium">Premium Member</p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };
