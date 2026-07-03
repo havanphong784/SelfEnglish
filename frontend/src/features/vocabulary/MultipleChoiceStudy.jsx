@@ -1,58 +1,51 @@
-import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Crown } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { CheckCircle, Crown, XCircle } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
 
 const MultipleChoiceStudy = ({ word, onNext, onMaster }) => {
   const [options, setOptions] = useState([]);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  useEffect(() => {
-    loadOptions();
-  }, [word]);
-
-  const loadOptions = async () => {
+  const loadOptions = useCallback(async () => {
     setSelectedAnswer(null);
     try {
       let query = `/vocabularies/random?excludeId=${word.id}&limit=3`;
       if (word.partOfSpeech) query += `&partOfSpeech=${encodeURIComponent(word.partOfSpeech)}`;
-      if (word.synonyms && word.synonyms.length > 0) query += `&excludeSynonyms=${encodeURIComponent(word.synonyms.join(','))}`;
-      
+      if (Array.isArray(word.synonyms) && word.synonyms.length > 0) {
+        query += `&excludeSynonyms=${encodeURIComponent(word.synonyms.join(','))}`;
+      }
+
       const distractors = await fetchWithAuth(query);
-      
-      let others = Array.isArray(distractors) ? distractors : [];
-      
-      // Fallback nếu database chưa có đủ từ
+      const others = Array.isArray(distractors) ? [...distractors] : [];
+
       while (others.length < 3) {
-        others.push({ id: `fake-${Math.random()}`, meaning: `Đáp án sai ${others.length + 1}` });
+        others.push({ id: `fallback-${others.length}`, meaning: `Lựa chọn bổ sung ${others.length + 1}` });
       }
 
       const mergedOptions = [word, ...others].sort(() => 0.5 - Math.random());
       setOptions(mergedOptions);
     } catch (error) {
-      console.error("Lỗi khi tải distractors:", error);
-      const fakeOptions = [word, { id: 1, meaning: 'Nghĩa sai 1' }, { id: 2, meaning: 'Nghĩa sai 2' }, { id: 3, meaning: 'Nghĩa sai 3' }].sort(() => 0.5 - Math.random());
-      setOptions(fakeOptions);
+      console.error('Lỗi khi tải lựa chọn:', error);
+      const fallbackOptions = [
+        word,
+        { id: 'fallback-1', meaning: 'Lựa chọn bổ sung 1' },
+        { id: 'fallback-2', meaning: 'Lựa chọn bổ sung 2' },
+        { id: 'fallback-3', meaning: 'Lựa chọn bổ sung 3' },
+      ].sort(() => 0.5 - Math.random());
+      setOptions(fallbackOptions);
     }
-  };
+  }, [word]);
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (selectedAnswer !== null) return;
-      const key = parseInt(e.key);
-      if (key >= 1 && key <= 4 && options[key - 1]) {
-        handleAnswer(options[key - 1]);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [options, selectedAnswer]);
+    loadOptions();
+  }, [loadOptions]);
 
-  const handleAnswer = (option) => {
+  const handleAnswer = useCallback((option) => {
     if (selectedAnswer !== null) return;
     setSelectedAnswer(option);
-    
+
     const isCorrect = option.id === word.id;
-    
+
     if (isCorrect && 'speechSynthesis' in window) {
       const msg = new SpeechSynthesisUtterance(word.word);
       msg.lang = 'en-US';
@@ -61,53 +54,76 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster }) => {
 
     setTimeout(() => {
       onNext(isCorrect);
-    }, 1500);
-  };
+    }, 1200);
+  }, [onNext, selectedAnswer, word]);
 
-  if (options.length === 0) return <div className="text-center py-10">Đang tạo câu hỏi...</div>;
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (selectedAnswer !== null) return;
+      const key = parseInt(event.key, 10);
+      if (key >= 1 && key <= 4 && options[key - 1]) {
+        handleAnswer(options[key - 1]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [options, selectedAnswer, handleAnswer]);
+
+  if (options.length === 0) {
+    return (
+      <div className="mx-auto max-w-2xl rounded-xl surface-panel p-8 text-center text-sm font-semibold text-muted-foreground">
+        Đang tạo câu hỏi...
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-card border-2 border-border rounded-3xl p-10 shadow-sm text-center max-w-2xl mx-auto">
-      <h2 className="text-5xl font-black text-primary mb-12 tracking-tight">{word.word}</h2>
-      
-      <div className="grid grid-cols-1 gap-4">
-        {options.map((option, idx) => {
-          let btnClass = "p-5 border-2 rounded-2xl text-lg font-medium transition-all text-left flex justify-between items-center group";
-          
+    <div className="mx-auto max-w-2xl rounded-xl surface-panel p-6 text-center md:p-8">
+      <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Chọn nghĩa đúng</p>
+      <h2 className="mb-8 text-balance text-4xl font-bold tracking-tight text-primary md:text-6xl">{word.word}</h2>
+
+      <div className="grid grid-cols-1 gap-3">
+        {options.map((option, index) => {
+          const isCorrect = option.id === word.id;
+          const isSelected = selectedAnswer?.id === option.id;
+          let buttonClass = 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5';
+
           if (selectedAnswer !== null) {
-            if (option.id === word.id) {
-              btnClass += " bg-green-500/10 border-green-500 text-green-700";
-            } else if (selectedAnswer.id === option.id) {
-              btnClass += " bg-red-500/10 border-red-500 text-red-700";
+            if (isCorrect) {
+              buttonClass = 'border-primary/35 bg-primary/10 text-primary';
+            } else if (isSelected) {
+              buttonClass = 'border-destructive/35 bg-destructive/10 text-destructive';
             } else {
-              btnClass += " opacity-50 bg-card border-border";
+              buttonClass = 'border-border bg-card text-muted-foreground opacity-60';
             }
-          } else {
-            btnClass += " bg-card hover:border-primary/50 hover:bg-primary/5 cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5";
           }
 
           return (
-            <button 
-              key={idx} 
+            <button
+              key={`${option.id}-${index}`}
               onClick={() => handleAnswer(option)}
-              className={btnClass}
+              className={`flex min-h-14 items-center justify-between gap-3 rounded-lg border p-4 text-left text-sm font-bold pressable ${buttonClass}`}
               disabled={selectedAnswer !== null}
             >
-              <span><span className="opacity-50 mr-2 font-bold">{idx + 1}.</span> {option.meaning}</span>
-              {selectedAnswer !== null && option.id === word.id && <CheckCircle className="text-green-600" />}
-              {selectedAnswer !== null && selectedAnswer.id === option.id && option.id !== word.id && <XCircle className="text-red-600" />}
+              <span className="leading-6">
+                <span className="mr-3 font-mono text-xs text-muted-foreground">{index + 1}</span>
+                {option.meaning}
+              </span>
+              {selectedAnswer !== null && isCorrect && <CheckCircle className="h-5 w-5 shrink-0 text-primary" />}
+              {selectedAnswer !== null && isSelected && !isCorrect && <XCircle className="h-5 w-5 shrink-0 text-destructive" />}
             </button>
           );
         })}
       </div>
 
       {onMaster && selectedAnswer === null && (
-        <button 
+        <button
           onClick={onMaster}
-          className="mt-8 flex items-center justify-center gap-2 mx-auto px-6 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 rounded-full font-bold transition-colors text-sm hover:-translate-y-0.5"
+          className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-bold text-foreground pressable hover:border-primary/40 hover:text-primary"
         >
-          <Crown className="w-4 h-4" />
-          Đã thuộc (Bỏ qua mọi cấp độ)
+          <Crown className="h-4 w-4" />
+          Đánh dấu đã thuộc
         </button>
       )}
     </div>

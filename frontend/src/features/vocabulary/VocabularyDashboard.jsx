@@ -1,224 +1,218 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Clock, Crown, ArrowUpRight, Flame, Sparkles, Target } from 'lucide-react';
+import { ArrowRight, BookOpen, Crown, Flame, Import, Layers, Target } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
 import { motion } from 'framer-motion';
+
+const StatPill = ({ icon: Icon, label, value }) => (
+  <div className="rounded-xl border border-border bg-card p-4">
+    <Icon className="mb-4 h-5 w-5 text-primary" />
+    <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums">{value}</p>
+    <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+  </div>
+);
+
+const LoadingState = () => (
+  <div className="mx-auto max-w-7xl space-y-5 pt-2">
+    <div className="h-56 rounded-xl surface-panel p-6">
+      <div className="h-4 w-28 rounded-full bg-muted" />
+      <div className="mt-10 h-10 w-80 max-w-full rounded-full bg-muted" />
+      <div className="mt-5 h-4 w-[28rem] max-w-full rounded-full bg-muted" />
+    </div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[0, 1, 2].map((item) => (
+        <div key={item} className="h-52 rounded-xl surface-flat p-5">
+          <div className="h-6 w-2/3 rounded-full bg-muted" />
+          <div className="mt-5 h-4 w-full rounded-full bg-muted" />
+          <div className="mt-12 h-2 w-full rounded-full bg-muted" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 const VocabularyDashboard = () => {
   const [packages, setPackages] = useState([]);
   const [reviewCount, setReviewCount] = useState(0);
   const [stats, setStats] = useState({ streak: 0, todayLearned: 0, levelDistribution: {} });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const pkgs = await fetchWithAuth('/vocabularies/packages');
+      setError('');
+      const [pkgs, reviews, userStats] = await Promise.all([
+        fetchWithAuth('/vocabularies/packages'),
+        fetchWithAuth('/vocabularies/review'),
+        fetchWithAuth('/vocabularies/stats'),
+      ]);
+
       setPackages(pkgs);
-
-      const reviews = await fetchWithAuth('/vocabularies/review');
       setReviewCount(reviews.length);
-
-      const userStats = await fetchWithAuth('/vocabularies/stats');
       setStats(userStats);
-    } catch (error) {
-      console.error('Lỗi khi tải dữ liệu:', error);
+    } catch (loadError) {
+      console.error('Lỗi khi tải dữ liệu:', loadError);
+      setError('Chưa tải được thư viện từ vựng. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const masteredCount = useMemo(() => stats.levelDistribution?.[6] || 0, [stats.levelDistribution]);
 
   const startReview = () => {
     if (reviewCount === 0) {
-      alert("Bạn không có từ vựng nào cần ôn hôm nay!");
+      alert('Bạn chưa có từ nào cần ôn hôm nay.');
       return;
     }
-    navigate(`/dashboard/vocabulary/study?mode=review`);
+    navigate('/dashboard/vocabulary/study?mode=review');
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingState />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 font-sans pb-10">
-      
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3 border border-primary/20">
-            <Sparkles className="w-3.5 h-3.5" /> Không giới hạn tiềm năng
-          </motion.div>
-          <motion.h1 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-4xl md:text-5xl font-bold text-foreground mb-3 font-secondary tracking-tight">
-            Luyện <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">Từ Vựng</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-muted-foreground max-w-xl text-sm md:text-base leading-relaxed">
-            Nắm vững mọi từ vựng mới nhờ vào phương pháp Spaced Repetition thông minh. Duy trì chuỗi ngày học để mở khóa nhiều thành tựu.
-          </motion.p>
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-6 pt-2">
+      <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-xl surface-panel p-6 md:p-8">
+          <p className="mb-4 inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            Từ vựng
+          </p>
+          <h1 className="max-w-2xl text-balance text-3xl font-bold tracking-tight text-foreground md:text-5xl">
+            Xây sổ từ, ôn đúng lúc, giữ trí nhớ nhẹ hơn.
+          </h1>
+          <p className="mt-5 max-w-2xl text-pretty text-sm leading-7 text-muted-foreground md:text-base">
+            Mỗi gói từ là một cụm bài riêng. Bạn có thể nhập JSON, học từ mới và để hệ thống đưa từ cần ôn về đúng hàng đợi.
+          </p>
 
-      {/* Premium Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-gradient-to-br from-orange-400 to-orange-600 p-5 md:p-6 flex flex-col justify-center rounded-[2rem] shadow-lg shadow-orange-500/30 relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-default">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -z-10 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-black/5 rounded-tr-[100px] -z-10"></div>
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-md text-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-white/30 group-hover:rotate-12 transition-transform">
-            <Flame className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
-          </div>
-          <div className="text-4xl md:text-5xl font-black text-white mb-1 font-secondary tracking-tight drop-shadow-md">{stats.streak || 0}</div>
-          <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/80">Ngày Streak</div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="bg-gradient-to-br from-blue-400 to-blue-600 p-5 md:p-6 flex flex-col justify-center rounded-[2rem] shadow-lg shadow-blue-500/30 relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-default">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -z-10 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-black/5 rounded-tr-[100px] -z-10"></div>
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-md text-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-white/30 group-hover:rotate-12 transition-transform">
-             <Target className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
-          </div>
-          <div className="text-4xl md:text-5xl font-black text-white mb-1 font-secondary tracking-tight drop-shadow-md">{stats.todayLearned || 0}</div>
-          <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/80">Từ Đã Học</div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="bg-gradient-to-br from-emerald-400 to-emerald-600 p-5 md:p-6 flex flex-col justify-center rounded-[2rem] shadow-lg shadow-emerald-500/30 relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-default">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -z-10 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-black/5 rounded-tr-[100px] -z-10"></div>
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-md text-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-white/30 group-hover:-rotate-12 transition-transform">
-            <Crown className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
-          </div>
-          <div className="text-4xl md:text-5xl font-black text-white mb-1 font-secondary tracking-tight drop-shadow-md">{stats.levelDistribution?.[6] || 0}</div>
-          <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/80">Từ Master</div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} className="bg-gradient-to-br from-[#4318FF] to-[#8854D0] p-5 md:p-6 flex flex-col justify-center rounded-[2rem] shadow-lg shadow-primary/30 relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-default border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -z-10 group-hover:scale-150 transition-transform duration-700"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-black/5 rounded-tr-[100px] -z-10"></div>
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-md text-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-white/30 group-hover:scale-110 transition-transform">
-            <Clock className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
-          </div>
-          <div className="text-4xl md:text-5xl font-black text-white mb-1 font-secondary tracking-tight drop-shadow-md">{reviewCount}</div>
-          <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/80">Cần Ôn Tập</div>
-        </motion.div>
-      </div>
-
-      {/* Review Banner with Glassmorphism */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="relative overflow-hidden bg-gradient-to-r from-[#2B1B54] to-[#EE4266] rounded-[2.5rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between group shadow-[0_20px_40px_-10px_rgba(238,66,102,0.4)]"
-      >
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-           <div className="absolute top-[-20%] left-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-           <div className="absolute bottom-[-20%] right-[-10%] w-64 h-64 bg-[#FFC300]/20 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 relative z-10 text-center md:text-left mb-6 md:mb-0">
-          <div className="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-xl">
-            <BookOpen className="w-10 h-10" />
-          </div>
-          <div className="text-white mt-2">
-            <h2 className="text-3xl md:text-4xl font-bold font-secondary mb-2 tracking-tight">
-              {reviewCount} từ chờ ôn hôm nay
-            </h2>
-            <p className="text-white/80 text-sm md:text-base font-medium max-w-md">Ôn tập đúng hạn để củng cố trí nhớ và mở khoá nhiều từ vựng ở cấp độ cao hơn!</p>
-          </div>
-        </div>
-        <button 
-          onClick={startReview}
-          className="relative z-10 px-8 py-4 bg-white text-[#EE4266] font-bold rounded-2xl transition-all shadow-xl hover:scale-105 active:scale-95 w-full md:w-auto"
-        >
-          Bắt đầu ôn tập
-        </button>
-      </motion.div>
-
-      {/* Library Section */}
-      <div className="pt-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h2 className="text-2xl font-bold text-foreground font-secondary flex items-center gap-2">
-            Thư viện Gói từ vựng
-          </h2>
-          <button 
-            onClick={() => navigate('/dashboard/vocabulary/import')}
-            className="px-5 py-2.5 bg-foreground text-white font-semibold rounded-xl hover:bg-foreground/90 transition-all text-sm soft-shadow hover:-translate-y-0.5"
-          >
-            + Import Gói Mới
-          </button>
-        </div>
-
-        {/* Packages Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {packages.map((pkg, idx) => (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + idx * 0.1 }}
-              key={pkg.id} 
-              className="group bg-white rounded-3xl p-6 relative overflow-hidden border border-border/50 transition-all duration-300 cursor-pointer soft-shadow hover:soft-shadow-primary hover:border-primary/30 flex flex-col justify-between hover:-translate-y-1"
-              onClick={() => navigate(`/dashboard/vocabulary/packages/${pkg.id}`)}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button
+              onClick={startReview}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-primary-foreground pressable hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform duration-500"></div>
-              
-              <div className="relative z-10 space-y-4 flex-1">
-                <div className="flex justify-between items-start gap-4">
-                  <h3 className="text-xl font-bold text-foreground font-secondary leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
-                    {pkg.title}
-                  </h3>
-                  {pkg.isPro ? (
-                    <span className="px-2.5 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-bold rounded-lg flex items-center gap-1 shrink-0 uppercase tracking-widest shadow-md shadow-orange-500/20">
-                      <Crown className="w-3 h-3" /> PRO
-                    </span>
-                  ) : (
-                    <span className="px-2.5 py-1 bg-muted text-muted-foreground text-[9px] font-bold rounded-lg shrink-0 uppercase tracking-widest">
-                      FREE
-                    </span>
-                  )}
-                </div>
-                
-                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                  {pkg.description || "Gói từ vựng chưa có mô tả. Thêm mô tả để biết nội dung chính của gói này."}
-                </p>
-                
-                <div className="flex items-center gap-2 text-xs font-bold pt-1">
-                  <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-xl">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>{pkg.totalWords} từ</span>
-                  </div>
-                  {pkg.level && (
-                    <div className="px-3 py-1.5 bg-muted rounded-xl text-muted-foreground">
-                      Level: {pkg.level}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-6 pt-5 border-t border-border/60 relative z-10">
-                <div className="flex justify-between text-xs text-muted-foreground font-bold mb-2 uppercase tracking-wider">
-                  <span>Tiến độ</span>
-                  <span className="text-foreground">{pkg.learnedWords || 0} / {pkg.totalWords || 0}</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full transition-all duration-1000 relative" 
-                    style={{ width: `${(pkg.totalWords || 0) > 0 ? ((pkg.learnedWords || 0) / pkg.totalWords) * 100 : 0}%` }}
-                  >
-                    <div className="absolute top-0 right-0 w-full h-full bg-white/20 blur-[2px] -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              Ôn {reviewCount} từ hôm nay
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate('/dashboard/vocabulary/import')}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-bold text-foreground pressable hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+            >
+              <Import className="h-4 w-4" />
+              Import gói mới
+            </button>
+          </div>
         </div>
-      </div>
+
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+          <StatPill icon={Flame} label="Chuỗi ngày" value={stats.streak || 0} />
+          <StatPill icon={Target} label="Học hôm nay" value={stats.todayLearned || 0} />
+          <StatPill icon={Crown} label="Đã master" value={masteredCount} />
+        </div>
+      </section>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-sm font-semibold text-destructive">
+          {error}
+        </div>
+      )}
+
+      <section className="rounded-xl surface-flat p-5 md:p-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">Thư viện</p>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground">Gói từ vựng</h2>
+          </div>
+          <p className="text-sm font-medium text-muted-foreground">{packages.length} gói đang có trong thư viện</p>
+        </div>
+
+        {packages.length === 0 ? (
+          <div className="flex min-h-[260px] flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
+            <Layers className="mb-4 h-8 w-8 text-primary" />
+            <h3 className="text-lg font-bold text-foreground">Chưa có gói từ nào</h3>
+            <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+              Import một file JSON có trường word và meaning để tạo gói học đầu tiên.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard/vocabulary/import')}
+              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground pressable"
+            >
+              <Import className="h-4 w-4" />
+              Import gói mới
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {packages.map((pkg, index) => {
+              const totalWords = pkg.totalWords || 0;
+              const learnedWords = pkg.learnedWords || 0;
+              const progress = totalWords > 0 ? Math.round((learnedWords / totalWords) * 100) : 0;
+
+              return (
+                <motion.button
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.04, duration: 0.36 }}
+                  key={pkg.id}
+                  type="button"
+                  className="group flex min-h-[230px] flex-col rounded-xl border border-border bg-card p-5 text-left pressable hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
+                  onClick={() => navigate(`/dashboard/vocabulary/packages/${pkg.id}`)}
+                >
+                  <div className="mb-5 flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <h3 className="line-clamp-2 text-xl font-bold tracking-tight text-foreground group-hover:text-primary">
+                        {pkg.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+                        {pkg.description || 'Gói từ này chưa có mô tả.'}
+                      </p>
+                    </div>
+                    {pkg.isPro ? (
+                      <span className="inline-flex items-center gap-1 rounded-md bg-warning/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-warning">
+                        <Crown className="h-3 w-3" />
+                        Pro
+                      </span>
+                    ) : (
+                      <span className="rounded-md bg-muted px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                        Free
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-auto">
+                    <div className="mb-4 flex flex-wrap gap-2 text-xs font-bold text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1.5 text-primary">
+                        <BookOpen className="h-3.5 w-3.5" />
+                        {totalWords} từ
+                      </span>
+                      {pkg.level && (
+                        <span className="rounded-md bg-muted px-2.5 py-1.5">
+                          Level {pkg.level}
+                        </span>
+                      )}
+                      {pkg.isOwner && (
+                        <span className="rounded-md bg-muted px-2.5 py-1.5">Của bạn</span>
+                      )}
+                    </div>
+
+                    <div className="mb-2 flex justify-between text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                      <span>Tiến độ</span>
+                      <span className="text-foreground tabular-nums">{learnedWords} / {totalWords}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-muted">
+                      <div className="h-full rounded-full bg-primary transition-[width] duration-700" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

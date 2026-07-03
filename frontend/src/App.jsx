@@ -11,8 +11,22 @@ const ImportVocabulary = lazy(() => import('./features/vocabulary/ImportVocabula
 const Landing = lazy(() => import('./features/auth/Landing'));
 
 const PageFallback = () => (
-  <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
+  <div className="flex min-h-[100dvh] items-center justify-center bg-background px-6 text-muted-foreground">
+    <div className="w-full max-w-sm space-y-4 rounded-xl surface-panel p-6">
+      <div className="h-3 w-24 overflow-hidden rounded-full bg-muted">
+        <div className="h-full w-1/2 animate-shimmer bg-primary/40" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-4 w-full rounded-full bg-muted" />
+        <div className="h-4 w-3/4 rounded-full bg-muted" />
+      </div>
+    </div>
+  </div>
+);
+
+const PlaceholderPage = ({ children }) => (
+  <div className="surface-panel mt-4 rounded-xl p-6 text-sm font-medium text-foreground">
+    {children}
   </div>
 );
 
@@ -32,10 +46,10 @@ function App() {
                 <Route path="import" element={<ImportVocabulary />} />
                 <Route path="packages/:packageId" element={<PackageDetails />} />
               </Route>
-              <Route path="listening" element={<div className="p-4">Luyen nghe</div>} />
-              <Route path="speaking" element={<div className="p-4">Luyen noi</div>} />
-              <Route path="exams" element={<div className="p-4">Luyen de</div>} />
-              <Route path="statistics" element={<div className="p-4">Thong ke</div>} />
+              <Route path="listening" element={<PlaceholderPage>Luyện nghe</PlaceholderPage>} />
+              <Route path="speaking" element={<PlaceholderPage>Luyện nói</PlaceholderPage>} />
+              <Route path="exams" element={<PlaceholderPage>Luyện đề</PlaceholderPage>} />
+              <Route path="statistics" element={<PlaceholderPage>Thống kê</PlaceholderPage>} />
             </Route>
           </Route>
         </Routes>

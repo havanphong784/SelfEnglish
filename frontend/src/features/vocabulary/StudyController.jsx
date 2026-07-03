@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, CheckCircle, Layers } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { fetchWithAuth } from '../../utils/api';
 
@@ -20,33 +20,7 @@ const StudyController = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [startTime] = useState(Date.now());
 
-  useEffect(() => {
-    const savedSessionStr = sessionStorage.getItem('currentStudySession');
-    if (savedSessionStr) {
-      const savedSession = JSON.parse(savedSessionStr);
-      if (savedSession.packageId === packageId && savedSession.mode === mode) {
-         if (window.confirm("Bạn có phiên học dang dở, muốn tiếp tục không?")) {
-            setWords(savedSession.words);
-            setCurrentIndex(savedSession.currentIndex);
-            setLoading(false);
-            return;
-         } else {
-            sessionStorage.removeItem('currentStudySession');
-         }
-      }
-    }
-    loadStudySession();
-  }, [packageId, mode]);
-
-  useEffect(() => {
-    if (words.length > 0 && !isFinished) {
-      sessionStorage.setItem('currentStudySession', JSON.stringify({ packageId, mode, currentIndex, words }));
-    } else if (isFinished) {
-      sessionStorage.removeItem('currentStudySession');
-    }
-  }, [currentIndex, words, isFinished, packageId, mode]);
-
-  const loadStudySession = async () => {
+  const loadStudySession = useCallback(async () => {
     try {
       setLoading(true);
       let data = [];
@@ -63,13 +37,36 @@ const StudyController = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [mode, packageId]);
 
-  // Tự động phát âm thanh khi chuyển sang từ mới
+  useEffect(() => {
+    const savedSessionStr = sessionStorage.getItem('currentStudySession');
+    if (savedSessionStr) {
+      const savedSession = JSON.parse(savedSessionStr);
+      if (savedSession.packageId === packageId && savedSession.mode === mode) {
+        if (window.confirm('Bạn có phiên học đang dở, muốn tiếp tục không?')) {
+          setWords(savedSession.words);
+          setCurrentIndex(savedSession.currentIndex);
+          setLoading(false);
+          return;
+        }
+        sessionStorage.removeItem('currentStudySession');
+      }
+    }
+    loadStudySession();
+  }, [packageId, mode, loadStudySession]);
+
+  useEffect(() => {
+    if (words.length > 0 && !isFinished) {
+      sessionStorage.setItem('currentStudySession', JSON.stringify({ packageId, mode, currentIndex, words }));
+    } else if (isFinished) {
+      sessionStorage.removeItem('currentStudySession');
+    }
+  }, [currentIndex, words, isFinished, packageId, mode]);
+
   useEffect(() => {
     if (words.length > 0 && words[currentIndex] && !isFinished) {
       if ('speechSynthesis' in window) {
-        // Tuỳ chọn huỷ đọc cũ để tránh đè giọng
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(words[currentIndex].word);
         msg.lang = 'en-US';
@@ -80,15 +77,11 @@ const StudyController = () => {
 
   const playSound = (type) => {
     try {
-      const audio = new Audio(
-        type === 'correct' 
-          ? '/sounds/correct.mp3'
-          : '/sounds/error.mp3'
-      );
+      const audio = new Audio(type === 'correct' ? '/sounds/correct.mp3' : '/sounds/error.mp3');
       audio.volume = 0.5;
       audio.play();
-    } catch (e) {
-      console.error('Lỗi phát âm thanh:', e);
+    } catch (error) {
+      console.error('Lỗi phát âm thanh:', error);
     }
   };
 
@@ -96,19 +89,17 @@ const StudyController = () => {
     const currentWord = words[currentIndex];
     const rating = typeof result === 'object' ? result.rating : null;
     const isCorrect = rating ? rating !== 'again' : Boolean(result);
-    
-    // Phát âm thanh đúng sai
+
     playSound(isCorrect ? 'correct' : 'incorrect');
 
-    // Gửi kết quả lên server nếu KHÔNG PHẢI là chế độ practice
     if (mode !== 'practice') {
       try {
         await fetchWithAuth(`/vocabularies/${currentWord.id}/review`, {
           method: 'POST',
-          body: JSON.stringify(rating ? { rating } : { isCorrect })
+          body: JSON.stringify(rating ? { rating } : { isCorrect }),
         });
-      } catch (err) {
-        console.error('Lỗi khi lưu kết quả:', err);
+      } catch (error) {
+        console.error('Lỗi khi lưu kết quả:', error);
       }
     }
 
@@ -119,61 +110,70 @@ const StudyController = () => {
     const currentWord = words[currentIndex];
     playSound('correct');
     confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#f43f5e', '#ec4899', '#8b5cf6']
+      particleCount: 90,
+      spread: 64,
+      origin: { y: 0.62 },
+      colors: ['#3f7661', '#6f786f', '#f6f7f2'],
     });
-    
+
     if (mode !== 'practice') {
       try {
         await fetchWithAuth(`/vocabularies/${currentWord.id}/master`, {
-          method: 'POST'
+          method: 'POST',
         });
-      } catch (err) {
-        console.error('Lỗi khi đánh dấu thuộc:', err);
+      } catch (error) {
+        console.error('Lỗi khi đánh dấu thuộc:', error);
       }
     }
-    
+
     moveToNext();
   };
 
   const moveToNext = async () => {
-    // Chuyển sang từ tiếp theo
     if (currentIndex + 1 < words.length) {
       setCurrentIndex(currentIndex + 1);
     } else {
       setIsFinished(true);
-      // Lưu session
       const durationMinutes = Math.max(1, Math.floor((Date.now() - startTime) / 60000));
       try {
         await fetchWithAuth('/vocabularies/session', {
           method: 'POST',
           body: JSON.stringify({
             durationMinutes,
-            wordsLearned: words.length
-          })
+            wordsLearned: words.length,
+          }),
         });
-      } catch (err) {
-        console.error('Lỗi lưu phiên học:', err);
+      } catch (error) {
+        console.error('Lỗi lưu phiên học:', error);
       }
     }
   };
 
   if (loading) {
-    return <div className="text-center py-12">Đang chuẩn bị bài học...</div>;
+    return (
+      <div className="mx-auto mt-10 max-w-3xl rounded-xl surface-panel p-8">
+        <div className="mb-8 h-3 w-32 overflow-hidden rounded-full bg-muted">
+          <div className="h-full w-1/2 animate-shimmer bg-primary/40" />
+        </div>
+        <div className="h-10 w-80 max-w-full rounded-full bg-muted" />
+        <div className="mt-5 h-4 w-full rounded-full bg-muted" />
+      </div>
+    );
   }
 
   if (words.length === 0) {
     return (
-      <div className="max-w-xl mx-auto mt-20 text-center space-y-6">
-        <h2 className="text-2xl font-bold">Không có từ vựng nào!</h2>
-        <p className="text-muted-foreground">Có thể bạn đã học hết gói này, hoặc hôm nay không có từ nào cần ôn.</p>
-        <button 
+      <div className="mx-auto mt-14 max-w-xl rounded-xl surface-panel p-8 text-center">
+        <Layers className="mx-auto mb-4 h-8 w-8 text-primary" />
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">Không có từ vựng nào</h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          Có thể bạn đã học hết gói này, hoặc hôm nay chưa có từ nào cần ôn.
+        </p>
+        <button
           onClick={() => navigate('/dashboard/vocabulary')}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-xl"
+          className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground pressable"
         >
-          Quay lại Thư viện
+          Quay lại thư viện
         </button>
       </div>
     );
@@ -181,82 +181,67 @@ const StudyController = () => {
 
   if (isFinished) {
     return (
-      <div className="max-w-xl mx-auto mt-20 text-center space-y-6 bg-white rounded-[2rem] p-12 soft-shadow border border-border">
-        <div className="w-24 h-24 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-12 h-12" />
+      <div className="mx-auto mt-14 max-w-xl rounded-xl surface-panel p-8 text-center md:p-10">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <CheckCircle className="h-9 w-9" />
         </div>
-        <h2 className="text-3xl font-bold">Hoàn thành xuất sắc!</h2>
-        <p className="text-muted-foreground">Bạn đã hoàn tất phiên học. Hãy nghỉ ngơi và quay lại vào ngày mai nhé.</p>
-        <button 
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Hoàn thành phiên học</h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          Kết quả đã được lưu. Quay lại thư viện để chọn phiên tiếp theo khi bạn sẵn sàng.
+        </p>
+        <button
           onClick={() => navigate('/dashboard/vocabulary')}
-          className="px-8 py-3 bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-pink-500/20 mt-4"
+          className="mt-7 inline-flex min-h-12 items-center rounded-lg bg-primary px-6 text-sm font-bold text-primary-foreground pressable"
         >
-          Về trang chủ
+          Về thư viện
         </button>
       </div>
     );
   }
 
   const currentWord = words[currentIndex];
-  const progressPercent = ((currentIndex) / words.length) * 100;
+  const progressPercent = ((currentIndex + 1) / words.length) * 100;
+  const currentLevel = currentWord.level || 1;
+  const StudyComponent = currentLevel <= 2 ? FlashcardStudy : currentLevel <= 4 ? MultipleChoiceStudy : TypingStudy;
 
-  // Quyết định Component render dựa trên Level
-  let StudyComponent;
-  const currentLevel = currentWord.level || 1; // Default to 1 if new word
-
-  if (currentLevel <= 2) {
-    StudyComponent = FlashcardStudy;
-  } else if (currentLevel <= 4) {
-    StudyComponent = MultipleChoiceStudy;
-  } else {
-    StudyComponent = TypingStudy;
-  }
-
-  const renderLevelDots = () => {
-    return (
-      <div className="flex justify-center gap-1.5 mb-6">
-        {[1, 2, 3, 4, 5, 6].map(lvl => (
-          <div 
-            key={lvl} 
-            className={`w-2.5 h-2.5 rounded-full ${lvl <= currentLevel ? 'bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]' : 'bg-muted'} transition-all duration-300`} 
-            title={`Level ${lvl}`}
-          />
-        ))}
-      </div>
-    );
-  };
+  const renderLevelDots = () => (
+    <div className="flex justify-center gap-2">
+      {[1, 2, 3, 4, 5, 6].map((level) => (
+        <div
+          key={level}
+          className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${level <= currentLevel ? 'bg-primary' : 'bg-muted'}`}
+          title={`Level ${level}`}
+        />
+      ))}
+    </div>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header & Progress */}
-      <div className="flex items-center gap-4 mb-8">
-        <button 
-          onClick={() => navigate('/dashboard/vocabulary')}
-          className="p-2 hover:bg-muted rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <div className="flex-1">
-          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-500 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
+    <div className="mx-auto max-w-5xl pt-2">
+      <div className="mb-6 rounded-xl surface-flat p-4">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/dashboard/vocabulary')}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground pressable hover:text-primary"
+            aria-label="Quay lại thư viện"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 h-2 overflow-hidden rounded-full bg-muted">
+              <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${progressPercent}%` }} />
+            </div>
+            <div className="flex justify-between text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              <span>Phiên học</span>
+              <span className="tabular-nums">{currentIndex + 1} / {words.length}</span>
+            </div>
           </div>
-        </div>
-        <div className="font-medium text-sm text-muted-foreground whitespace-nowrap">
-          {currentIndex + 1} / {words.length}
         </div>
       </div>
 
-      {/* Render Sub-Component */}
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500" key={currentWord.id}>
-        {renderLevelDots()}
-        <StudyComponent 
-          word={currentWord} 
-          onNext={handleResult} 
-          onMaster={handleMaster}
-        />
+        <div className="mb-5">{renderLevelDots()}</div>
+        <StudyComponent word={currentWord} onNext={handleResult} onMaster={handleMaster} />
       </div>
     </div>
   );

@@ -1,97 +1,92 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Headphones, Mic, CheckSquare, BarChart, Settings, Users } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { BarChart, BookOpen, CheckSquare, Headphones, LayoutDashboard, Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '../lib/utils';
+
+const menuItems = [
+  { icon: LayoutDashboard, path: '/dashboard', label: 'Tổng quan' },
+  { icon: BookOpen, path: '/dashboard/vocabulary', label: 'Từ vựng' },
+  { icon: Headphones, path: '/dashboard/listening', label: 'Nghe' },
+  { icon: Mic, path: '/dashboard/speaking', label: 'Nói' },
+  { icon: CheckSquare, path: '/dashboard/exams', label: 'Luyện đề' },
+  { icon: BarChart, path: '/dashboard/statistics', label: 'Thống kê' },
+];
+
+const isActivePath = (pathname, path) => {
+  if (path === '/dashboard') return pathname === '/dashboard';
+  return pathname.startsWith(path);
+};
 
 const Sidebar = () => {
   const location = useLocation();
-  
-  const menuItems = [
-    { icon: LayoutDashboard, path: '/dashboard', label: 'Home' },
-    { icon: BookOpen, path: '/dashboard/vocabulary', label: 'Vocab' },
-    { icon: Headphones, path: '/dashboard/listening', label: 'Listen' },
-    { icon: Mic, path: '/dashboard/speaking', label: 'Speak' },
-    { icon: CheckSquare, path: '/dashboard/exams', label: 'Exams' },
-    { icon: BarChart, path: '/dashboard/statistics', label: 'Stats' },
-    { icon: Users, path: '/dashboard/community', label: 'Community' },
-    { icon: Settings, path: '/dashboard/settings', label: 'Settings' },
-  ];
-
   const mobileItems = menuItems.slice(0, 5);
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-[100px] bg-white h-full relative z-20 flex-col items-center py-8 rounded-r-[2rem] soft-shadow shrink-0">
-        
-        {/* Logo */}
-        <div className="mb-12 relative group cursor-pointer flex flex-col items-center">
-          <div className="w-12 h-12 bg-gradient-to-tr from-primary to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-primary/30 shadow-lg mb-1">
-            <BookOpen className="w-6 h-6" />
+      <aside className="sticky top-0 z-20 hidden min-h-[100dvh] w-[236px] shrink-0 border-r border-border/80 bg-background/85 px-4 py-5 backdrop-blur-xl md:flex md:flex-col">
+        <Link to="/dashboard" className="mb-8 flex items-center gap-3 rounded-xl px-2 py-2 pressable">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground text-sm font-bold tracking-tight text-background">
+            SE
           </div>
-          <span className="text-[10px] font-bold text-foreground">SelfEnglish</span>
-        </div>
-        
-        {/* Navigation */}
-        <nav className="flex flex-col gap-4 w-full px-4 overflow-y-auto no-scrollbar pb-4">
+          <div className="min-w-0">
+            <p className="text-sm font-bold leading-5 text-foreground">SelfEnglish</p>
+            <p className="text-xs font-medium text-muted-foreground">Study ledger</p>
+          </div>
+        </Link>
+
+        <nav className="flex flex-1 flex-col gap-1">
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
+            const isActive = isActivePath(location.pathname, item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                title={item.label}
-                className="relative flex items-center justify-center w-full aspect-square rounded-2xl group transition-all shrink-0"
+                className={cn(
+                  'relative flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold text-muted-foreground pressable focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30',
+                  isActive && 'text-foreground'
+                )}
               >
                 {isActive && (
-                  <motion.div 
+                  <motion.span
                     layoutId="sidebar-active"
-                    className="absolute inset-0 bg-primary rounded-2xl soft-shadow-primary"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="absolute inset-0 rounded-lg bg-card shadow-[0_0_0_1px_rgba(45,55,48,0.1),0_10px_28px_-24px_rgba(37,48,40,0.7)]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                   />
                 )}
-                <item.icon 
-                  className={cn(
-                    "w-6 h-6 relative z-10 transition-colors duration-300", 
-                    isActive ? "text-white" : "text-muted-foreground group-hover:text-primary"
-                  )} 
-                />
+                <item.icon className={cn('relative z-10 h-4 w-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
+                <span className="relative z-10">{item.label}</span>
               </Link>
             );
           })}
         </nav>
-        
+
+        <div className="mt-8 rounded-xl border border-border/80 bg-card/60 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">Focus</span>
+            <span className="h-2 w-2 animate-soft-pulse rounded-full bg-primary" />
+          </div>
+          <p className="text-sm font-semibold leading-5 text-foreground">Một phiên ngắn, lặp đều mỗi ngày.</p>
+        </div>
       </aside>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white z-50 flex items-center justify-around px-2 py-3 rounded-t-3xl soft-shadow border-t border-border/50">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-border/80 bg-background/95 px-2 py-2 backdrop-blur-xl md:hidden">
         {mobileItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
+          const isActive = isActivePath(location.pathname, item.path);
           return (
             <Link
               key={item.path}
               to={item.path}
-              className="relative flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all"
+              className="relative flex h-14 min-w-[60px] flex-col items-center justify-center rounded-lg px-2 text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               {isActive && (
-                <motion.div 
+                <motion.span
                   layoutId="mobile-nav-active"
-                  className="absolute inset-0 bg-primary/10 rounded-2xl"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="absolute inset-0 rounded-lg bg-card shadow-[0_0_0_1px_rgba(45,55,48,0.1)]"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                 />
               )}
-              <item.icon 
-                className={cn(
-                  "w-6 h-6 relative z-10 mb-0.5 transition-colors duration-300", 
-                  isActive ? "text-primary" : "text-muted-foreground"
-                )} 
-              />
-              <span className={cn(
-                "text-[10px] font-semibold relative z-10 transition-colors duration-300",
-                isActive ? "text-primary" : "text-muted-foreground"
-              )}>
+              <item.icon className={cn('relative z-10 mb-1 h-4 w-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
+              <span className={cn('relative z-10', isActive ? 'text-foreground' : 'text-muted-foreground')}>
                 {item.label}
               </span>
             </Link>
