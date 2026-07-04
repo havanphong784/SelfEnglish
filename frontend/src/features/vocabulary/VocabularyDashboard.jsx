@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Clock, Crown, ArrowUpRight, Flame, Sparkles, Target } from 'lucide-react';
+import { BookOpen, Clock, Crown, Flame, Sparkles, Target } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
 import { motion } from 'framer-motion';
 

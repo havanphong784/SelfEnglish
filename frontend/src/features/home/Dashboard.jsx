@@ -6,7 +6,7 @@ import {
 import { fetchWithAuth } from '../../utils/api';
 import { 
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
-  PieChart, Pie, Cell, BarChart, Bar, ComposedChart
+  PieChart, Pie, Cell, Bar, ComposedChart
 } from 'recharts';
 
 // --- Components ---

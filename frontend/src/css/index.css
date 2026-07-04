@@ -3,6 +3,10 @@
 @theme {
   --color-primary: #5A52FF;
   --color-primary-foreground: #FFFFFF;
+  --color-accent: #EE4266;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #FFFFFF;
   --color-background: #F8FAFC;
   --color-foreground: #1E293B;
   --color-card: #FFFFFF;
@@ -39,9 +43,30 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+
+  :focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-ring) 75%, white);
+    outline-offset: 3px;
+  }
 }
 
 @layer utilities {
+  .skip-link {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+    transform: translateY(-150%);
+    border-radius: 0.75rem;
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    transition: transform 150ms ease;
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+  }
   .soft-shadow {
     box-shadow: 0 20px 40px -10px rgba(220, 224, 241, 0.8);
   }

@@ -13,9 +13,9 @@ const Header = () => {
         </div>
         
         {/* Mobile Avatar (Visible only on small screens without space) */}
-        <div className="lg:hidden w-10 h-10 rounded-full bg-indigo-100 overflow-hidden cursor-pointer border-2 border-white soft-shadow-sm shrink-0">
-           <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Avatar" className="w-full h-full object-cover" />
-        </div>
+        <button type="button" aria-label="Mở hồ sơ người dùng" className="lg:hidden w-10 h-10 rounded-full bg-indigo-100 overflow-hidden cursor-pointer border-2 border-white soft-shadow-sm shrink-0">
+           <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="" className="w-full h-full object-cover" />
+        </button>
       </div>
       
       {/* Controls Section */}
@@ -23,7 +23,7 @@ const Header = () => {
         
         {/* Filters & Search */}
         <div className="flex items-center gap-2 md:gap-3 flex-1 lg:flex-none">
-          <button className="hidden sm:flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl text-sm font-semibold text-muted-foreground soft-shadow-sm hover:text-foreground transition-colors shrink-0">
+          <button type="button" aria-label="Chọn khoảng thời gian thống kê" className="hidden sm:flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl text-sm font-semibold text-muted-foreground soft-shadow-sm hover:text-foreground transition-colors shrink-0">
             Năm nay <ChevronDown className="w-4 h-4" />
           </button>
           
@@ -31,6 +31,7 @@ const Header = () => {
             <Search className="w-4 h-4 text-muted-foreground mr-2 shrink-0" />
             <input 
               type="text" 
+              aria-label="Tìm kiếm"
               placeholder="Tìm kiếm..." 
               className="bg-transparent border-none outline-none text-sm w-full text-foreground placeholder:text-muted-foreground font-medium"
             />
@@ -39,23 +40,23 @@ const Header = () => {
 
         {/* Language & Actions (Hidden on very small screens, visible on md+) */}
         <div className="hidden sm:flex items-center gap-4 border-l border-border pl-4 md:pl-6">
-          <button className="flex items-center gap-2 text-sm font-semibold text-foreground hover:opacity-80">
-            <img src="https://flagcdn.com/w20/vn.png" alt="VN" className="w-5 rounded-sm shrink-0" />
+          <button type="button" aria-label="Chọn ngôn ngữ" className="flex items-center gap-2 text-sm font-semibold text-foreground hover:opacity-80">
+            <img src="https://flagcdn.com/w20/vn.png" alt="" className="w-5 rounded-sm shrink-0" />
             <span className="hidden md:inline">Tiếng Việt</span> <ChevronDown className="w-4 h-4 text-muted-foreground" />
           </button>
           
           <div className="flex items-center gap-2 md:gap-3 ml-1 md:ml-2">
-            <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center soft-shadow-sm text-muted-foreground hover:text-primary transition-colors shrink-0">
+            <button type="button" aria-label="Mở hộp thư" className="w-10 h-10 rounded-full bg-white flex items-center justify-center soft-shadow-sm text-muted-foreground hover:text-primary transition-colors shrink-0">
               <Mail className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center soft-shadow-sm text-muted-foreground hover:text-primary transition-colors relative shrink-0">
+            <button type="button" aria-label="Mở thông báo" className="w-10 h-10 rounded-full bg-white flex items-center justify-center soft-shadow-sm text-muted-foreground hover:text-primary transition-colors relative shrink-0">
               <Bell className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span aria-hidden="true" className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
             
-            <div className="hidden lg:block w-10 h-10 rounded-full bg-indigo-100 ml-1 md:ml-2 overflow-hidden cursor-pointer border-2 border-white soft-shadow-sm shrink-0">
-               <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Avatar" className="w-full h-full object-cover" />
-            </div>
+            <button type="button" aria-label="Mở hồ sơ người dùng" className="hidden lg:block w-10 h-10 rounded-full bg-indigo-100 ml-1 md:ml-2 overflow-hidden cursor-pointer border-2 border-white soft-shadow-sm shrink-0">
+               <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="" className="w-full h-full object-cover" />
+            </button>
           </div>
         </div>
       </div>

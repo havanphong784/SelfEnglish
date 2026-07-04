@@ -1,43 +1,39 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, Crown, Gauge, Lightbulb, Repeat, Volume2, X, Zap } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Crown, Gauge, Lightbulb, Repeat, Volume2, X, Zap } from 'lucide-react';
 
 const ratings = [
   {
     value: 'again',
-    label: 'Again',
-    hint: '1 / Left',
+    label: 'Quên',
+    effect: 'Lùi cấp',
     icon: X,
-    classes: 'border-red-100 bg-red-50 text-red-700 hover:border-red-200 hover:bg-red-100',
-    iconClasses: 'bg-red-200/50 group-hover:bg-red-200',
+    classes: 'border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100',
   },
   {
     value: 'hard',
-    label: 'Hard',
-    hint: '2',
+    label: 'Khó',
+    effect: 'Giữ nhịp',
     icon: Gauge,
-    classes: 'border-amber-100 bg-amber-50 text-amber-700 hover:border-amber-200 hover:bg-amber-100',
-    iconClasses: 'bg-amber-200/50 group-hover:bg-amber-200',
+    classes: 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100',
   },
   {
     value: 'good',
-    label: 'Good',
-    hint: '3 / Right',
+    label: 'Nhớ',
+    effect: 'Tăng cấp',
     icon: Check,
-    classes: 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-emerald-200 hover:bg-emerald-100',
-    iconClasses: 'bg-emerald-200/50 group-hover:bg-emerald-200',
+    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100',
   },
   {
     value: 'easy',
-    label: 'Easy',
-    hint: '4',
+    label: 'Dễ',
+    effect: 'Tăng nhanh',
     icon: Zap,
-    classes: 'border-sky-100 bg-sky-50 text-sky-700 hover:border-sky-200 hover:bg-sky-100',
-    iconClasses: 'bg-sky-200/50 group-hover:bg-sky-200',
+    classes: 'border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-300 hover:bg-sky-100',
   },
 ];
 
-const FlashcardStudy = ({ word, onNext, onMaster }) => {
+const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [reverseMode, setReverseMode] = useState(false);
   const [autoPlay, setAutoPlay] = useState(true);
@@ -68,9 +64,10 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
     }
   }, [isFlipped, autoPlay, reverseMode, word, playAudio]);
 
-  const handleAction = useCallback((rating) => {
-    onNext({ rating });
-  }, [onNext]);
+  const handleAction = useCallback((payload) => {
+    if (disabled) return;
+    onNext(payload);
+  }, [disabled, onNext]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -84,10 +81,10 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
 
       if (!isFlipped) return;
 
-      if (event.code === 'ArrowLeft' || event.code === 'Digit1') handleAction('again');
-      if (event.code === 'Digit2') handleAction('hard');
-      if (event.code === 'ArrowRight' || event.code === 'Digit3') handleAction('good');
-      if (event.code === 'Digit4') handleAction('easy');
+      if (event.code === 'ArrowLeft' || event.code === 'Digit1') handleAction({ rating: 'again' });
+      if (event.code === 'Digit2') handleAction({ rating: 'hard' });
+      if (event.code === 'ArrowRight' || event.code === 'Digit3') handleAction({ rating: 'good' });
+      if (event.code === 'Digit4') handleAction({ rating: 'easy' });
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -99,10 +96,11 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
   const audioButton = (dark = false) => (
     <button
       onClick={(event) => playAudio(event, word.word)}
-      className={`absolute right-6 top-6 rounded-full p-3 transition-all hover:scale-110 active:scale-95 md:right-8 md:top-8 md:p-4 ${
+      className={`absolute right-6 top-6 rounded-full p-3 transition-transform hover:scale-110 active:scale-95 md:right-8 md:top-8 md:p-4 ${
         dark ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'
       }`}
-      title="Play audio"
+      title="Nghe phát âm"
+      type="button"
     >
       <Volume2 className="h-5 w-5 md:h-6 md:w-6" />
     </button>
@@ -110,14 +108,13 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
 
   const englishCard = (back = false) => (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border border-primary/10 bg-gradient-to-br from-white to-primary/5 p-8 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] [backface-visibility:hidden] md:p-12"
+      className="absolute inset-0 flex flex-col items-center justify-center rounded-[2rem] border border-primary/10 bg-gradient-to-br from-white to-primary/5 p-8 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] [backface-visibility:hidden] md:p-12"
       style={back ? { transform: 'rotateY(180deg)' } : undefined}
     >
-      <div className="absolute right-0 top-0 -z-10 h-40 w-40 rounded-bl-[100px] bg-primary/5" />
       {audioButton()}
 
       {word.partOfSpeech && (
-        <span className="mb-6 rounded-full bg-gradient-to-r from-primary to-indigo-500 px-4 py-1.5 text-xs font-bold tracking-wider text-white shadow-md shadow-primary/20 md:text-sm">
+        <span className="mb-6 rounded-full bg-primary px-4 py-1.5 text-xs font-bold tracking-wider text-primary-foreground shadow-md shadow-primary/20 md:text-sm">
           {word.partOfSpeech.toUpperCase()}
         </span>
       )}
@@ -127,7 +124,7 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
       </h2>
 
       {word.ipa && (
-        <p className="rounded-2xl border border-border/50 bg-white/50 px-5 py-2 font-mono text-lg font-medium text-muted-foreground shadow-sm md:text-2xl">
+        <p className="rounded-2xl border border-border/50 bg-white/70 px-5 py-2 font-mono text-lg font-medium text-muted-foreground shadow-sm md:text-2xl">
           {word.ipa}
         </p>
       )}
@@ -138,10 +135,10 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
         </div>
       )}
 
-      {word.synonyms && !back && (
-        <div className="absolute bottom-8 left-8 right-8 rounded-2xl border border-primary/10 bg-white/60 p-4 text-center shadow-sm backdrop-blur-sm">
+      {Array.isArray(word.synonyms) && word.synonyms.length > 0 && !back && (
+        <div className="absolute bottom-8 left-8 right-8 rounded-2xl border border-primary/10 bg-white/70 p-4 text-center shadow-sm backdrop-blur-sm">
           <p className="text-sm font-medium text-foreground/80 md:text-base">
-            <span className="mr-2 font-bold text-primary">Synonyms:</span>{word.synonyms}
+            <span className="mr-2 font-bold text-primary">Đồng nghĩa:</span>{word.synonyms.join(', ')}
           </p>
         </div>
       )}
@@ -150,10 +147,9 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
 
   const meaningCard = (back = false) => (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center rounded-[2.5rem] border border-white/20 bg-gradient-to-br from-[#4318FF] to-[#8854D0] p-8 shadow-[0_20px_50px_-12px_rgba(67,24,255,0.4)] [backface-visibility:hidden] md:p-12"
+      className="absolute inset-0 flex flex-col items-center justify-center rounded-[2rem] border border-primary/20 bg-gradient-to-br from-primary to-indigo-600 p-8 shadow-[0_20px_50px_-12px_rgba(67,24,255,0.35)] [backface-visibility:hidden] md:p-12"
       style={back ? { transform: 'rotateY(180deg)' } : undefined}
     >
-      <div className="pointer-events-none absolute -top-[20%] left-[-10%] h-64 w-64 rounded-full bg-white/10 blur-3xl" />
       {!back && reverseMode ? null : audioButton(true)}
 
       <h3 className="mb-8 text-center text-3xl font-bold leading-tight tracking-tight text-white drop-shadow-md md:text-5xl">
@@ -172,17 +168,18 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
             event.stopPropagation();
             setShowHint(true);
           }}
-          className="mt-6 flex items-center gap-3 rounded-2xl border border-white/30 bg-white/20 px-8 py-4 font-bold text-white shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:bg-white/30 active:scale-95"
+          className="mt-6 flex items-center gap-3 rounded-2xl border border-white/30 bg-white/20 px-8 py-4 font-bold text-white shadow-xl backdrop-blur-md transition-transform hover:scale-105 active:scale-95"
+          type="button"
         >
           <Lightbulb className="h-6 w-6 text-yellow-300 drop-shadow-sm" />
-          Hint
+          Gợi ý
         </button>
       )}
 
       {reverseMode && showHint && (
         <div className="mt-4 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-inner backdrop-blur-md">
           <p className="font-mono text-3xl font-bold tracking-[0.4em] text-white drop-shadow-md md:text-4xl">
-            {word.word[0].toUpperCase()}{Array(word.word.length - 1).fill('_').join(' ')}
+            {word.word[0].toUpperCase()}{Array(Math.max(word.word.length - 1, 0)).fill('_').join(' ')}
           </p>
         </div>
       )}
@@ -191,55 +188,59 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col items-center py-4">
-      <div className="mb-8 flex w-full items-center justify-between px-4">
+      <div className="mb-8 flex w-full items-center justify-between gap-3 px-1 sm:px-4">
         <button
           onClick={() => setReverseMode((prev) => !prev)}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
+          className={`flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
             reverseMode ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
           }`}
+          type="button"
         >
           <Repeat className="h-4 w-4" />
-          {reverseMode ? 'Meaning to word' : 'Word to meaning'}
+          {reverseMode ? 'Nghĩa -> từ' : 'Từ -> nghĩa'}
         </button>
 
         <button
           onClick={() => setAutoPlay((prev) => !prev)}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
+          className={`flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
             autoPlay ? 'border border-primary/20 bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
           }`}
+          type="button"
         >
           <Volume2 className={`h-4 w-4 ${!autoPlay ? 'opacity-50' : ''}`} />
-          Auto audio: {autoPlay ? 'On' : 'Off'}
+          Tự đọc: {autoPlay ? 'Bật' : 'Tắt'}
         </button>
       </div>
 
       <div
-        className="group relative mb-10 aspect-[4/3] w-full cursor-pointer [perspective:1200px] md:aspect-[16/9]"
+        className="group relative mb-8 aspect-[4/3] w-full cursor-pointer [perspective:1200px] md:aspect-[16/9]"
         onClick={() => setIsFlipped((prev) => !prev)}
       >
         <motion.div
           className="h-full w-full [transform-style:preserve-3d]"
           animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.6, type: 'spring', stiffness: 200, damping: 20 }}
+          transition={{ duration: 0.5, type: 'spring', stiffness: 220, damping: 22 }}
         >
           {reverseMode ? meaningCard(false) : englishCard(false)}
           {reverseMode ? englishCard(true) : meaningCard(true)}
         </motion.div>
-        <div className="absolute -inset-4 -z-10 rounded-[2.5rem] bg-primary/5 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100" />
       </div>
 
       <div className="flex min-h-[120px] w-full flex-col items-center justify-center">
         <AnimatePresence mode="wait">
           {!isFlipped ? (
-            <motion.div
-              key="flip-hint"
+            <motion.button
+              key="flip-action"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="font-medium text-muted-foreground"
+              onClick={() => setIsFlipped(true)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition-colors hover:bg-muted"
+              type="button"
             >
-              Press <kbd className="mx-1 rounded-lg border border-border/50 bg-secondary px-3 py-1.5 font-mono text-sm text-foreground shadow-sm">Space</kbd> or click to flip
-            </motion.div>
+              <Repeat className="h-4 w-4" />
+              Lật thẻ
+            </motion.button>
           ) : (
             <motion.div
               key="actions"
@@ -255,34 +256,66 @@ const FlashcardStudy = ({ word, onNext, onMaster }) => {
                       key={rating.value}
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleAction(rating.value);
+                        handleAction({ rating: rating.value });
                       }}
-                      className={`group flex min-h-[96px] items-center gap-3 rounded-2xl border-2 p-3 font-bold shadow-sm transition-all hover:scale-105 active:scale-95 ${rating.classes}`}
+                      disabled={disabled}
+                      className={`group flex min-h-[96px] items-center gap-3 rounded-2xl border-2 p-3 font-bold shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 ${rating.classes}`}
+                      type="button"
                     >
-                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors ${rating.iconClasses}`}>
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/60 shadow-sm">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="flex min-w-0 flex-col items-start">
                         <span className="text-base md:text-lg">{rating.label}</span>
-                        <span className="text-xs font-medium opacity-70">{rating.hint}</span>
+                        <span className="text-xs font-medium opacity-70">{rating.effect}</span>
                       </div>
                     </button>
                   );
                 })}
               </div>
 
-              {onMaster && (
+              <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
                   onClick={(event) => {
                     event.stopPropagation();
-                    onMaster();
+                    handleAction({ action: 'prev' });
                   }}
-                  className="flex items-center gap-2 rounded-full border border-pink-100 bg-pink-50 px-6 py-3 font-bold text-pink-600 shadow-sm transition-all hover:scale-105 hover:bg-pink-100 active:scale-95"
+                  disabled={disabled}
+                  className="flex min-h-10 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
+                  type="button"
                 >
-                  <Crown className="h-5 w-5" />
-                  Mark as mastered
+                  <ChevronLeft className="h-4 w-4" />
+                  Lùi
                 </button>
-              )}
+
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleAction({ action: 'next' });
+                  }}
+                  disabled={disabled}
+                  className="flex min-h-10 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
+                  type="button"
+                >
+                  Bỏ qua
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
+                {onMaster && (
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onMaster();
+                    }}
+                    disabled={disabled}
+                    className="flex min-h-10 items-center gap-2 rounded-full border border-pink-100 bg-pink-50 px-5 py-2.5 text-sm font-bold text-pink-600 transition-colors hover:bg-pink-100 disabled:cursor-wait disabled:opacity-60"
+                    type="button"
+                  >
+                    <Crown className="h-4 w-4" />
+                    Đã thuộc
+                  </button>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

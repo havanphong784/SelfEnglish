@@ -33,7 +33,7 @@ const Sidebar = () => {
         </div>
         
         {/* Navigation */}
-        <nav className="flex flex-col gap-4 w-full px-4 overflow-y-auto no-scrollbar pb-4">
+        <nav aria-label="Điều hướng chính" className="flex flex-col gap-4 w-full px-4 overflow-y-auto no-scrollbar pb-4">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
             return (
@@ -41,6 +41,8 @@ const Sidebar = () => {
                 key={item.path}
                 to={item.path}
                 title={item.label}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
                 className="relative flex items-center justify-center w-full aspect-square rounded-2xl group transition-all shrink-0"
               >
                 {isActive && (
@@ -65,13 +67,15 @@ const Sidebar = () => {
       </aside>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white z-50 flex items-center justify-around px-2 py-3 rounded-t-3xl soft-shadow border-t border-border/50">
+      <nav aria-label="Điều hướng di động" className="md:hidden fixed bottom-0 left-0 right-0 bg-white z-50 flex items-center justify-around px-2 py-3 rounded-t-3xl soft-shadow border-t border-border/50">
         {mobileItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
           return (
             <Link
               key={item.path}
               to={item.path}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className="relative flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all"
             >
               {isActive && (

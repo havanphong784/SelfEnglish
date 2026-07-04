@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../../config/firebase';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -7,6 +7,7 @@ import { API_BASE_URL } from '../../utils/api';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const shouldReduceMotion = useReducedMotion();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,10 +67,10 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col md:flex-row font-sans">
+    <main className="min-h-screen bg-background relative overflow-hidden flex flex-col md:flex-row font-sans">
       {/* Animated Background Blobs */}
       <motion.div 
-        animate={{ 
+        animate={shouldReduceMotion ? false : { 
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
           x: [0, 50, 0],
@@ -79,7 +80,7 @@ export default function Landing() {
         className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/30 blur-[150px] pointer-events-none" 
       />
       <motion.div 
-        animate={{ 
+        animate={shouldReduceMotion ? false : { 
           scale: [1, 1.3, 1],
           opacity: [0.2, 0.4, 0.2],
           x: [0, -40, 0],
@@ -152,9 +153,11 @@ export default function Landing() {
 
           <form onSubmit={handleEmailAuth} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5 ml-1">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5 ml-1">Email</label>
               <input 
+                id="email"
                 type="email" 
+                autoComplete="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -164,11 +167,13 @@ export default function Landing() {
             </div>
             <div>
               <div className="flex justify-between items-center mb-1.5 ml-1">
-                <label className="block text-sm font-medium text-foreground">Mật khẩu</label>
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">Mật khẩu</label>
                 {isLogin && <a href="#" className="text-xs text-primary hover:underline">Quên mật khẩu?</a>}
               </div>
               <input 
+                id="password"
                 type="password" 
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -192,9 +197,10 @@ export default function Landing() {
 
           <button 
             onClick={signInWithGoogle}
+            type="button"
             className="w-full mt-8 bg-card/50 hover:bg-card border border-white/10 text-foreground font-medium py-3 rounded-xl transition-all flex items-center justify-center space-x-3 group"
           >
-            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+            <svg aria-hidden="true" className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
             </svg>
             <span>Google</span>
@@ -204,6 +210,7 @@ export default function Landing() {
             {isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
             <button 
               onClick={() => setIsLogin(!isLogin)} 
+              type="button"
               className="text-primary font-semibold hover:underline"
             >
               {isLogin ? 'Tạo ngay' : 'Đăng nhập'}
@@ -211,7 +218,7 @@ export default function Landing() {
           </p>
         </motion.div>
       </div>
-    </div>
+    </main>
   );
 }
 

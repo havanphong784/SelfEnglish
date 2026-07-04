@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchWithAuth } from '../../utils/api';
 import { ChevronLeft, CheckCircle2, Play, RotateCcw, Crown } from 'lucide-react';
@@ -20,11 +20,7 @@ const PackageDetails = () => {
   const [loading, setLoading] = useState(true);
   const [masteringId, setMasteringId] = useState(null);
 
-  useEffect(() => {
-    loadDetails();
-  }, [packageId]);
-
-  const loadDetails = async () => {
+  const loadDetails = useCallback(async () => {
     try {
       setLoading(true);
       const data = await fetchWithAuth(`/vocabularies/packages/${packageId}/details`);
@@ -34,7 +30,11 @@ const PackageDetails = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [packageId]);
+
+  useEffect(() => {
+    loadDetails();
+  }, [loadDetails]);
 
   const handleMaster = async (wordId) => {
     try {

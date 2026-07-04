@@ -44,7 +44,10 @@ const Vocabulary = () => {
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Học từ vựng (Flashcards)</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium">
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium"
+          type="button"
+        >
           <Upload className="w-4 h-4" /> Import CSV
         </button>
       </div>
@@ -64,6 +67,7 @@ const Vocabulary = () => {
               <h2 className="text-5xl font-bold mb-6 text-foreground">{card.word}</h2>
               <button 
                 onClick={playAudio}
+                type="button"
                 className="p-4 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-colors text-foreground"
                 title="Nghe phát âm"
               >
@@ -84,22 +88,43 @@ const Vocabulary = () => {
           </motion.div>
         </div>
 
-        <div className="flex items-center gap-8 mt-10">
-          <button 
-            onClick={handlePrev}
-            className="p-3 rounded-full border bg-card hover:bg-secondary transition-colors text-foreground"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          <span className="font-medium text-muted-foreground text-lg">
-            {currentIndex + 1} / {flashcards.length}
-          </span>
-          <button 
-            onClick={handleNext}
-            className="p-3 rounded-full border bg-card hover:bg-secondary transition-colors text-foreground"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
+        <div className="flex flex-col w-full max-w-xl gap-6 mt-10">
+          <div className="flex justify-center gap-4">
+            <button 
+              onClick={handleNext}
+              className="flex-1 py-3 rounded-xl border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-semibold transition-colors"
+              type="button"
+            >
+              Quên
+            </button>
+            <button 
+              onClick={handleNext}
+              className="flex-1 py-3 rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold transition-colors"
+              type="button"
+            >
+              Nhớ
+            </button>
+          </div>
+          
+          <div className="flex items-center justify-between mt-2">
+            <button 
+              onClick={handlePrev}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-card hover:bg-secondary transition-colors text-foreground font-medium"
+              type="button"
+            >
+              <ChevronLeft className="w-5 h-5" /> Lùi
+            </button>
+            <span className="font-medium text-muted-foreground">
+              {currentIndex + 1} / {flashcards.length}
+            </span>
+            <button 
+              onClick={handleNext}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-card hover:bg-secondary transition-colors text-foreground font-medium"
+              type="button"
+            >
+              Tiến <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
