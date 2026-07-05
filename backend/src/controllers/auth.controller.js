@@ -14,7 +14,7 @@ exports.verifyToken = async (req, res) => {
       return res.status(503).json({ error: 'Firebase Admin chua duoc cau hinh' });
     }
 
-    const decodedToken = await getAuth(firebaseAdminApp).verifyIdToken(idToken);
+    const decodedToken = await getAuth(firebaseAdminApp).verifyIdToken(idToken, true);
     const { uid, email, name } = decodedToken;
 
     if (!email) {
@@ -43,6 +43,8 @@ exports.verifyToken = async (req, res) => {
         where: { id: user.id },
         data: { firebaseUid: uid },
       });
+    } else if (user.firebaseUid !== uid) {
+      return res.status(409).json({ error: 'Email nay da duoc lien ket voi tai khoan khac' });
     }
 
     res.json({

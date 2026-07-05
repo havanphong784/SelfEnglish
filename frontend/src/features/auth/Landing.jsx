@@ -1,12 +1,14 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../../config/firebase';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { API_BASE_URL } from '../../utils/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const shouldReduceMotion = useReducedMotion();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -15,7 +17,7 @@ export default function Landing() {
 
   const handleFirebaseLogin = async (result) => {
     try {
-      const idToken = await result.user.getIdToken();
+      const idToken = await result.user.getIdToken(true);
       
       // Gửi token lên backend để xác thực và lấy thông tin User
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
@@ -32,7 +34,7 @@ export default function Landing() {
       if (data.user) {
         // Lưu token hoặc thông tin user vào localStorage/Context
         localStorage.setItem('user', JSON.stringify(data.user));
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
     } catch (err) {
       console.error(err);
@@ -65,6 +67,10 @@ export default function Landing() {
       setError(err.message);
     }
   };
+
+  if (currentUser) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <main className="min-h-screen bg-background relative overflow-hidden flex flex-col md:flex-row font-sans">
