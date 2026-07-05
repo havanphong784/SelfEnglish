@@ -15,7 +15,7 @@ const ActivityChart = () => {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <h3 className="se-label mb-4 text-foreground">Mức độ hoạt động</h3>
+      <h3 className="se-label mb-4 text-foreground">Nhịp học của bạn</h3>
       <div className="flex-1 flex items-center justify-center overflow-x-auto py-2">
         <div className="flex gap-1.5">
           {Array.from({ length: weeks }).map((_, w) => (
@@ -27,7 +27,7 @@ const ActivityChart = () => {
                   <div 
                     key={`${w}-${d}`} 
                     className={`h-4 w-4 rounded-sm border border-border ${getIntensityColor(level)} transition-transform hover:scale-110`}
-                    title={`Hoạt động mức ${level}`}
+                    title={`Mức học ${level}`}
                   />
                 )
               })}

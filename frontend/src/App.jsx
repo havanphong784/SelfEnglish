@@ -20,10 +20,10 @@ const PageFallback = () => (
 const ComingSoon = ({ title }) => (
   <div className="se-shell py-4">
     <Panel className="text-center">
-      <div className="se-eyebrow mb-4">Sắp ra mắt</div>
+      <div className="se-eyebrow mb-4">Đang hoàn thiện</div>
       <h1 className="se-page-title">{title}</h1>
       <p className="se-body mx-auto mt-3 max-w-xl text-sm">
-        Khu vực này đang được chuẩn bị để đồng bộ với hệ học tập mới.
+        Tính năng này sắp có mặt. Tụi mình đang làm cho trải nghiệm học mượt hơn, dùng là vào guồng ngay.
       </p>
     </Panel>
   </div>

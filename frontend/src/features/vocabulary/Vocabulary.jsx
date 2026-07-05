@@ -37,7 +37,7 @@ const Vocabulary = () => {
       msg.lang = 'en-US';
       window.speechSynthesis.speak(msg);
     } else {
-      alert("Trình duyệt không hỗ trợ phát âm thanh");
+      alert('Trình duyệt của bạn chưa hỗ trợ phát âm.');
     }
   };
 
@@ -46,7 +46,7 @@ const Vocabulary = () => {
       <div className="flex items-center justify-between">
         <h1 className="se-page-title">Học từ vựng</h1>
         <Button>
-          <Upload className="w-4 h-4" /> Import CSV
+          <Upload className="w-4 h-4" /> Thêm file CSV
         </Button>
       </div>
 
@@ -71,7 +71,7 @@ const Vocabulary = () => {
               >
                 <Volume2 className="w-8 h-8" />
               </button>
-              <p className="mt-8 text-sm font-bold text-muted-foreground animate-pulse">Click để xem nghĩa</p>
+              <p className="mt-8 text-sm font-bold text-muted-foreground animate-pulse">Bấm để xem nghĩa</p>
             </Panel>
             
             {/* Back */}
@@ -93,14 +93,14 @@ const Vocabulary = () => {
               className="se-button se-button-danger se-button-md flex-1"
               type="button"
             >
-              Quên
+              Chưa nhớ
             </button>
             <button 
               onClick={handleNext}
               className="se-button se-button-soft se-button-md flex-1"
               type="button"
             >
-              Nhớ
+              Nhớ rồi
             </button>
           </div>
           
@@ -110,7 +110,7 @@ const Vocabulary = () => {
               className="se-button se-button-secondary se-button-sm"
               type="button"
             >
-              <ChevronLeft className="w-5 h-5" /> Lùi
+              <ChevronLeft className="w-5 h-5" /> Từ trước
             </button>
             <span className="font-medium text-muted-foreground">
               {currentIndex + 1} / {flashcards.length}
@@ -120,7 +120,7 @@ const Vocabulary = () => {
               className="se-button se-button-secondary se-button-sm"
               type="button"
             >
-              Tiến <ChevronRight className="w-5 h-5" />
+              Từ tiếp <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>

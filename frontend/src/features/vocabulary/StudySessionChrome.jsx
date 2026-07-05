@@ -2,12 +2,12 @@ import { AlertTriangle, ArrowLeft, BookOpen, RotateCcw, Target, Trophy } from 'l
 import { Button, IconSticker, Panel, ProgressBar } from '../../components/ui/Primitives';
 
 export const StudyLoading = () => (
-  <div className="py-12 text-center font-bold text-muted-foreground">Đang chuẩn bị bài học...</div>
+  <div className="py-12 text-center font-bold text-muted-foreground">Đang chuẩn bị phiên học...</div>
 );
 
 export const StudyLoadError = ({ error, onRetry, onBack }) => (
   <Panel className="mx-auto mt-20 max-w-xl space-y-6 text-center">
-    <h2 className="text-2xl font-black text-foreground">Không tải được bài học</h2>
+    <h2 className="text-2xl font-black text-foreground">Chưa mở được phiên học</h2>
     <p className="font-bold text-muted-foreground">{error}</p>
     <div className="flex justify-center gap-3">
       <Button
@@ -21,7 +21,7 @@ export const StudyLoadError = ({ error, onRetry, onBack }) => (
         variant="secondary"
       >
         <BookOpen className="h-4 w-4" />
-        Thư viện
+        Kho từ
       </Button>
     </div>
   </Panel>
@@ -30,13 +30,13 @@ export const StudyLoadError = ({ error, onRetry, onBack }) => (
 export const EmptyStudyState = ({ onBack }) => (
   <Panel className="mx-auto mt-20 max-w-xl space-y-6 text-center">
     <IconSticker icon={BookOpen} className="mx-auto" />
-    <h2 className="text-2xl font-black text-foreground">Không có từ vựng nào!</h2>
-    <p className="font-bold text-muted-foreground">Có thể bạn đã học hết gói này, hoặc hôm nay không có từ nào cần ôn.</p>
+    <h2 className="text-2xl font-black text-foreground">Không có từ nào để học</h2>
+    <p className="font-bold text-muted-foreground">Có thể bạn đã học hết gói này, hoặc hôm nay chưa có từ nào cần ôn. Nice!</p>
     <Button
       onClick={onBack}
     >
       <BookOpen className="h-4 w-4" />
-      Thư viện
+      Kho từ
     </Button>
   </Panel>
 );
@@ -50,9 +50,9 @@ const SummaryTile = ({ label, value, detail, tone = 'default' }) => {
   }[tone];
 
   return (
-    <div className={`rounded-xl border-2 p-5 ${toneClass}`}>
+    <div className={`rounded-xl border-2 p-4 ${toneClass}`}>
       <div className="se-label text-[12px] opacity-80">{label}</div>
-      <div className="se-stat-value mt-3 text-[42px]">{value}</div>
+      <div className="se-stat-value mt-2 text-[36px]">{value}</div>
       {detail && <div className="mt-1 text-xs font-semibold opacity-70">{detail}</div>}
     </div>
   );
@@ -62,11 +62,11 @@ export const FinishedStudy = ({ error, summary, retryCount, onRetryMissed, onBac
   <div className="mx-auto mt-10 max-w-4xl space-y-6">
     <Panel className="text-center">
       <IconSticker icon={Trophy} className="mx-auto mb-6 h-20 w-20 border-primary bg-storybook-green text-primary" />
-      <h2 className="text-3xl font-black tracking-tight text-foreground">Phiên học đã ghi sổ</h2>
+      <h2 className="text-3xl font-black tracking-tight text-foreground">Xong phiên học!</h2>
       <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-relaxed text-muted-foreground">
         {retryCount > 0
-          ? 'Có một nhóm từ chưa chắc. Ôn lại ngay sẽ hiệu quả hơn để ngày mai nhẹ hơn.'
-          : 'Ổn rồi. Không còn từ nào bị đánh dấu cần ôn lại trong phiên này.'}
+          ? 'Có vài từ bạn chưa chắc. Ôn lại ngay một vòng nữa là nhớ chắc hơn.'
+          : 'Ổn áp. Phiên này không còn từ nào cần ôn lại.'}
       </p>
       {error && (
         <p className="mx-auto mt-5 max-w-xl rounded-xl border-2 border-[#f2d15b] bg-[#fff9da] px-4 py-3 text-sm font-bold text-[#8a6200]">
@@ -76,9 +76,9 @@ export const FinishedStudy = ({ error, summary, retryCount, onRetryMissed, onBac
     </Panel>
 
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      <SummaryTile label="Đã xử lý" value={summary.answered} detail={`${summary.score}% chắc`} />
-      <SummaryTile label="Nhớ chắc" value={summary.remembered + summary.mastered} tone="success" />
-      <SummaryTile label="Cần ôn" value={summary.needsReview} tone="warning" />
+      <SummaryTile label="Đã làm" value={summary.answered} detail={`${summary.score}% đúng nhịp`} />
+      <SummaryTile label="Nhớ được" value={summary.remembered + summary.mastered} tone="success" />
+      <SummaryTile label="Cần ôn lại" value={summary.needsReview} tone="warning" />
       <SummaryTile label="Bỏ qua" value={summary.skipped} tone="muted" />
     </div>
 
@@ -96,7 +96,7 @@ export const FinishedStudy = ({ error, summary, retryCount, onRetryMissed, onBac
         variant="secondary"
       >
         <BookOpen className="h-5 w-5" />
-        Về thư viện
+        Về kho từ
       </Button>
     </div>
   </div>
@@ -106,41 +106,41 @@ export const StudyHeader = ({ currentIndex, totalWords, modeLabel, summary, onBa
   const progressPercent = (currentIndex / totalWords) * 100;
 
   return (
-    <div className="mb-6 space-y-4">
+    <div className="mb-3 space-y-3">
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <Button
             onClick={onBack}
             variant="secondary"
             size="icon"
-            aria-label="Quay lại thư viện"
+            aria-label="Quay lại kho từ"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="min-w-0">
-            <div className="se-label text-[12px]">{modeLabel}</div>
-            <h1 className="truncate text-2xl font-black tracking-tight text-foreground">Luyện từ vựng</h1>
+            <div className="se-label text-[11px]">{modeLabel}</div>
+            <h1 className="truncate text-xl font-black tracking-tight text-foreground md:text-2xl">Học từ vựng</h1>
           </div>
         </div>
-        <div className="rounded-xl border-2 border-border bg-card px-4 py-2 text-right">
+        <div className="rounded-xl border-2 border-border bg-card px-4 py-1.5 text-right">
           <div className="font-secondary text-lg font-black tabular-nums text-foreground">{currentIndex + 1}/{totalWords}</div>
-          <div className="se-label text-[10px]">Thẻ</div>
+          <div className="se-label text-[10px]">Từ</div>
         </div>
       </div>
 
       <ProgressBar value={progressPercent} />
 
       <div className="grid grid-cols-3 gap-2">
-        <div className="rounded-xl border-2 border-border bg-card px-3 py-2">
-          <div className="font-secondary text-xl font-black tabular-nums text-foreground">{summary.remembered + summary.mastered}</div>
+        <div className="rounded-xl border-2 border-border bg-card px-3 py-1.5">
+          <div className="font-secondary text-lg font-black tabular-nums text-foreground">{summary.remembered + summary.mastered}</div>
           <div className="se-label text-[10px]">Nhớ</div>
         </div>
-        <div className="rounded-xl border-2 border-[#f2d15b] bg-[#fff9da] px-3 py-2 text-[#8a6200]">
-          <div className="font-secondary text-xl font-black tabular-nums">{summary.needsReview}</div>
+        <div className="rounded-xl border-2 border-[#f2d15b] bg-[#fff9da] px-3 py-1.5 text-[#8a6200]">
+          <div className="font-secondary text-lg font-black tabular-nums">{summary.needsReview}</div>
           <div className="text-[10px] font-black uppercase tracking-[0.16em] opacity-70">Ôn</div>
         </div>
-        <div className="rounded-xl border-2 border-border bg-muted px-3 py-2 text-muted-foreground">
-          <div className="font-secondary text-xl font-black tabular-nums">{summary.skipped}</div>
+        <div className="rounded-xl border-2 border-border bg-muted px-3 py-1.5 text-muted-foreground">
+          <div className="font-secondary text-lg font-black tabular-nums">{summary.skipped}</div>
           <div className="text-[10px] font-black uppercase tracking-[0.16em] opacity-70">Bỏ</div>
         </div>
       </div>
@@ -149,20 +149,20 @@ export const StudyHeader = ({ currentIndex, totalWords, modeLabel, summary, onBa
 };
 
 export const LevelPanel = ({ level }) => (
-  <Panel>
+  <Panel className="p-4">
     <div className="flex items-center justify-between gap-3">
       <div>
-        <div className="se-label text-[12px]">Cấp độ</div>
-        <div className="se-stat-value mt-1 text-[36px]">{level}</div>
+        <div className="se-label text-[12px]">Mức nhớ</div>
+        <div className="se-stat-value mt-1 text-[32px]">{level}</div>
       </div>
       <Target className="h-8 w-8 text-primary" />
     </div>
-    <div className="mt-5 grid grid-cols-6 gap-1.5">
+    <div className="mt-4 grid grid-cols-6 gap-1.5">
       {[1, 2, 3, 4, 5, 6].map((lvl) => (
         <div
           key={lvl}
           className={`h-2 rounded-full border border-border ${lvl <= level ? 'bg-primary' : 'bg-muted'}`}
-          title={`Level ${lvl}`}
+          title={`Mức ${lvl}`}
         />
       ))}
     </div>
@@ -170,21 +170,21 @@ export const LevelPanel = ({ level }) => (
 );
 
 export const SessionLedger = ({ summary, totalWords }) => (
-  <Panel>
+  <Panel className="p-4">
     <div className="flex items-center justify-between">
       <div>
         <div className="se-label text-[12px]">Phiên học</div>
-        <div className="se-stat-value mt-1 text-[36px]">{summary.answered}</div>
+        <div className="se-stat-value mt-1 text-[32px]">{summary.answered}</div>
       </div>
       <BookOpen className="h-8 w-8 text-muted-foreground" />
     </div>
-    <div className="mt-4 space-y-3 text-sm font-semibold">
+    <div className="mt-3 space-y-2.5 text-sm font-semibold">
       <div className="flex items-center justify-between">
-        <span className="text-muted-foreground">Đã trả lời</span>
+        <span className="text-muted-foreground">Đã làm</span>
         <span className="font-secondary tabular-nums">{summary.answered}/{totalWords}</span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-muted-foreground">Độ chắc</span>
+        <span className="text-muted-foreground">Độ ổn</span>
         <span className="font-secondary tabular-nums">{summary.score}%</span>
       </div>
       <div className="flex items-center justify-between text-[#8a6200]">

@@ -13,7 +13,7 @@ const data = [
 const StatisticsChart = () => {
   return (
     <div className="h-full w-full flex flex-col">
-      <h3 className="se-label mb-4 text-foreground">Thống kê học tập tuần này</h3>
+      <h3 className="se-label mb-4 text-foreground">Tiến độ tuần này</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>

@@ -73,7 +73,7 @@ const PackageDetails = () => {
     }
   };
 
-  if (loading) return <div className="p-8 text-center font-bold text-muted-foreground">Đang tải chi tiết...</div>;
+  if (loading) return <div className="p-8 text-center font-bold text-muted-foreground">Đang mở gói từ...</div>;
   if (!details) return <div className="p-8 text-center font-bold text-danger">Không tìm thấy dữ liệu</div>;
 
   const renderProgressBar = () => {
@@ -91,7 +91,7 @@ const PackageDetails = () => {
               key={lvl} 
               style={{ width: `${percent}%` }} 
               className={`${LEVEL_COLORS[lvl]} transition-all duration-500 cursor-help`}
-              title={`Level ${lvl}: ${count} từ`}
+              title={`Mức ${lvl}: ${count} từ`}
             />
           );
         })}
@@ -106,7 +106,7 @@ const PackageDetails = () => {
         variant="ghost"
       >
         <ChevronLeft className="w-5 h-5" />
-        Quay lại thư viện
+        Quay lại kho từ
       </Button>
 
       <Panel>
@@ -122,13 +122,13 @@ const PackageDetails = () => {
             
             <div className="pt-4 space-y-2">
               <div className="flex justify-between text-sm font-black uppercase tracking-[0.08em]">
-                <span className="text-muted-foreground">Tiến độ học: <span className="text-foreground">{details.learnedWords}</span> / {details.totalWords} từ</span>
+                <span className="text-muted-foreground">Đã học: <span className="text-foreground">{details.learnedWords}</span> / {details.totalWords} từ</span>
                 <span className="text-primary">{Math.round((details.learnedWords / details.totalWords) * 100) || 0}%</span>
               </div>
               {renderProgressBar()}
               <div className="flex gap-4 pt-2 text-xs font-bold text-muted-foreground">
-                <div className="flex items-center gap-1.5"><div className={`w-3 h-3 rounded-full ${LEVEL_COLORS[1]}`}></div> Level 1</div>
-                <div className="flex items-center gap-1.5"><div className={`w-3 h-3 rounded-full ${LEVEL_COLORS[6]}`}></div> Master</div>
+                <div className="flex items-center gap-1.5"><div className={`w-3 h-3 rounded-full ${LEVEL_COLORS[1]}`}></div> Mức 1</div>
+                <div className="flex items-center gap-1.5"><div className={`w-3 h-3 rounded-full ${LEVEL_COLORS[6]}`}></div> Thành thạo</div>
               </div>
             </div>
           </div>
@@ -157,15 +157,15 @@ const PackageDetails = () => {
       </Panel>
 
       <div className="space-y-4">
-        <h2 className="se-heading text-[clamp(30px,4vw,44px)]">Danh sách từ vựng</h2>
+        <h2 className="se-heading text-[clamp(30px,4vw,44px)]">Từ trong gói</h2>
         <Panel className="overflow-x-auto p-0">
           <table className="se-table min-w-[880px]">
             <thead>
               <tr>
-                <th className="w-1/4">Từ vựng</th>
+                <th className="w-1/4">Từ tiếng Anh</th>
                 <th className="w-1/4">Nghĩa</th>
-                <th className="text-center">Level</th>
-                <th className="text-center">Lịch ôn tiếp</th>
+                <th className="text-center">Mức nhớ</th>
+                <th className="text-center">Lần ôn tiếp</th>
                 <th className="text-right">Hành động</th>
               </tr>
             </thead>
@@ -180,7 +180,7 @@ const PackageDetails = () => {
                   <td className="text-center">
                     {w.level > 0 ? (
                       <span className={`inline-flex items-center rounded-xl border-2 px-3 py-1 text-[10px] font-black uppercase tracking-widest ${LEVEL_BADGES[w.level]}`}>
-                        {w.level === 6 ? 'Master' : `Level ${w.level}`}
+                        {w.level === 6 ? 'Thành thạo' : `Mức ${w.level}`}
                       </span>
                     ) : (
                       <Badge>Chưa học</Badge>
@@ -201,7 +201,7 @@ const PackageDetails = () => {
                         size="sm"
                       >
                         <CheckCircle2 className="w-4 h-4" />
-                        Đã thuộc
+                        Mình nhớ rồi
                       </Button>
                     )}
                   </td>

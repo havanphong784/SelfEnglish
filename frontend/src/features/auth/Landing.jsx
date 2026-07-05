@@ -10,9 +10,9 @@ import { API_BASE_URL } from '../../utils/api';
 import { Badge, Button, IconSticker, Panel } from '../../components/ui/Primitives';
 
 const features = [
-  { icon: Layers3, title: 'Flashcard sống động', text: 'Lật thẻ, nghe phát âm và ghi nhớ từ mới theo từng cấp độ.' },
-  { icon: LineChart, title: 'Tiến độ rõ ràng', text: 'Theo dõi từ đã học, chuỗi ngày và mục tiêu tuần trong một nơi.' },
-  { icon: GraduationCap, title: 'Ôn đúng lúc', text: 'Spaced repetition giúp bạn quay lại đúng nhóm từ cần củng cố.' },
+  { icon: Layers3, title: 'Học từ bằng flashcard', text: 'Lật thẻ, nghe phát âm và ghi nhớ nghĩa nhanh hơn mỗi ngày.' },
+  { icon: LineChart, title: 'Theo dõi tiến độ', text: 'Xem số từ đã học, chuỗi học và mục tiêu tuần trong một nơi.' },
+  { icon: GraduationCap, title: 'Ôn tập thông minh', text: 'Hệ thống nhắc lại đúng lúc để bạn nhớ lâu hơn mà không bị quá tải.' },
 ];
 
 export default function Landing() {
@@ -103,7 +103,7 @@ export default function Landing() {
               SelfEnglish
             </motion.h1>
             <p className="se-body mt-5 max-w-xl">
-              Tự học từ vựng, luyện phát âm và ôn tập ngắt quãng trong một không gian trắng, vui và đủ rõ để bạn quay lại mỗi ngày.
+              Tự học từ vựng, luyện phát âm và ôn tập theo lịch thông minh. Mỗi ngày một chút, level up tiếng Anh cực gọn.
             </p>
           </div>
 
@@ -114,9 +114,9 @@ export default function Landing() {
           </div>
 
           <div className="grid max-w-2xl gap-4 sm:grid-cols-3">
-            <MiniStat label="Từ hôm nay" value="12" />
-            <MiniStat label="Streak" value="7" tone="green" />
-            <MiniStat label="Review" value="24" tone="blue" />
+            <MiniStat label="Từ mới hôm nay" value="12" />
+            <MiniStat label="Chuỗi học" value="7" tone="green" />
+            <MiniStat label="Cần ôn" value="24" tone="blue" />
           </div>
         </div>
 
@@ -124,13 +124,13 @@ export default function Landing() {
           <div className="mb-8 text-center">
             <Badge tone="green" className="mb-4">
               <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-              Bắt đầu ngay
+              Học ngay
             </Badge>
             <h2 className="text-3xl font-black text-foreground">
               {isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}
             </h2>
             <p className="se-body mt-2 text-sm">
-              {isLogin ? 'Chào mừng bạn quay trở lại.' : 'Tạo tài khoản để lưu tiến độ học.'}
+              {isLogin ? 'Vào học tiếp thôi, đừng để mất mood.' : 'Tạo tài khoản để lưu tiến độ học của bạn.'}
             </p>
           </div>
 
@@ -191,7 +191,7 @@ export default function Landing() {
             <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
             </svg>
-            Tiếp tục với Google
+            Đăng nhập với Google
           </Button>
 
           <p className="mt-8 text-center text-sm font-bold text-muted-foreground">

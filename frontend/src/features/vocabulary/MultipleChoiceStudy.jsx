@@ -102,13 +102,13 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
   }, []);
 
   if (isLoadingOptions) {
-    return <div className="py-10 text-center font-bold text-muted-foreground">Đang tạo câu hỏi...</div>;
+    return <div className="py-10 text-center font-bold text-muted-foreground">Đang tạo câu hỏi cho bạn...</div>;
   }
 
   if (options.length < 2) {
     return (
       <Panel className="mx-auto max-w-2xl text-center">
-        <p className="se-label mb-4 justify-center">Tự đánh giá</p>
+        <p className="se-label mb-4 justify-center">Tự kiểm tra</p>
         <h2 className="mb-4 font-secondary text-5xl font-black tracking-tight text-primary">{word.word}</h2>
         <p className="mx-auto mb-8 max-w-lg text-2xl font-bold leading-snug text-foreground">"{word.meaning}"</p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -119,7 +119,7 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
             type="button"
           >
             <X className="h-5 w-5" />
-            Cần ôn
+            Chưa chắc
           </button>
           <button
             onClick={() => onNext(true)}
@@ -128,7 +128,7 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
             type="button"
           >
             <Check className="h-5 w-5" />
-            Nhớ
+            Nhớ rồi
           </button>
         </div>
         {onMaster && (
@@ -139,7 +139,7 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
             className="mt-8"
           >
             <Crown className="h-4 w-4" />
-            Đã thuộc
+            Mình nhớ rồi
           </Button>
         )}
       </Panel>
@@ -190,7 +190,7 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
           className="mx-auto mt-8"
         >
           <Crown className="h-4 w-4" />
-          Đã thuộc
+          Mình nhớ rồi
         </Button>
       )}
     </Panel>

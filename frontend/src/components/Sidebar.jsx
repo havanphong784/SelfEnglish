@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 
 const menuItems = [
-  { icon: Home, path: '/dashboard', label: 'Home' },
-  { icon: BookOpen, path: '/dashboard/vocabulary', label: 'Vocab' },
-  { icon: Headphones, path: '/dashboard/listening', label: 'Listen' },
-  { icon: Mic, path: '/dashboard/speaking', label: 'Speak' },
-  { icon: CheckSquare, path: '/dashboard/exams', label: 'Exams' },
-  { icon: BarChart, path: '/dashboard/statistics', label: 'Stats' },
-  { icon: Users, path: '/dashboard/community', label: 'Community' },
-  { icon: Settings, path: '/dashboard/settings', label: 'Settings' },
+  { icon: Home, path: '/dashboard', label: 'Tổng quan' },
+  { icon: BookOpen, path: '/dashboard/vocabulary', label: 'Từ vựng' },
+  { icon: Headphones, path: '/dashboard/listening', label: 'Nghe' },
+  { icon: Mic, path: '/dashboard/speaking', label: 'Nói' },
+  { icon: CheckSquare, path: '/dashboard/exams', label: 'Đề thi' },
+  { icon: BarChart, path: '/dashboard/statistics', label: 'Tiến độ' },
+  { icon: Users, path: '/dashboard/community', label: 'Bạn học' },
+  { icon: Settings, path: '/dashboard/settings', label: 'Cài đặt' },
 ];
 
 const isActivePath = (pathname, path) => (
@@ -58,7 +58,6 @@ const Sidebar = () => {
           <span className="se-icon-sticker h-14 w-14 border-primary bg-storybook-green text-primary">
             <BookOpen className="h-7 w-7" aria-hidden="true" />
           </span>
-          <span className="text-[11px] font-black leading-tight text-foreground">SelfEnglish</span>
         </Link>
 
         <nav aria-label="Điều hướng chính" className="flex w-full flex-1 flex-col gap-3 overflow-y-auto pb-4">

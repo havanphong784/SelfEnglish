@@ -75,7 +75,7 @@ const TypingStudy = ({ word, onNext, onMaster, disabled = false }) => {
 
   return (
     <Panel className="mx-auto max-w-2xl text-center">
-      <p className="mb-4 text-xl font-bold text-muted-foreground">Hãy gõ từ tiếng Anh có nghĩa là:</p>
+      <p className="mb-4 text-xl font-bold text-muted-foreground">Gõ từ tiếng Anh có nghĩa là:</p>
       <h2 className="mb-12 text-4xl font-black text-primary">"{word.meaning}"</h2>
 
       <form onSubmit={handleSubmit} className="max-w-md mx-auto relative">
@@ -94,7 +94,7 @@ const TypingStudy = ({ word, onNext, onMaster, disabled = false }) => {
               status === 'correct' ? 'border-primary bg-storybook-green text-foreground' :
               status === 'typo' ? 'border-[#f2d15b] bg-[#fff9da] text-[#8a6200]' :
               'border-danger bg-[#fff2f2] text-danger'}`}
-          placeholder="Gõ từ vào đây..."
+          placeholder="Nhập đáp án..."
         />
 
         {status === 'correct' && (
@@ -115,24 +115,24 @@ const TypingStudy = ({ word, onNext, onMaster, disabled = false }) => {
             size="lg"
             className="mt-8 w-full"
           >
-            Kiểm tra
+            Kiểm tra đáp án
           </Button>
         )}
 
         {status === 'typo' && (
           <div className="mt-8 rounded-xl border-2 border-[#f2d15b] bg-[#fff9da] p-5 font-bold text-[#8a6200] animate-in slide-in-from-bottom-4">
-            Gần đúng rồi! Chú ý chính tả nhé.
+            Gần đúng rồi! Check lại chính tả một xíu nhé.
           </div>
         )}
 
         {status === 'incorrect' && (
           <div className="mt-8 rounded-xl border-2 border-danger bg-[#fff2f2] p-5 font-bold text-danger animate-in slide-in-from-bottom-4">
-            Sai rồi! Đáp án đúng là: <strong className="text-2xl ml-2 tracking-wide font-black">{word.word}</strong>
+            Chưa đúng rồi. Đáp án là: <strong className="text-2xl ml-2 tracking-wide font-black">{word.word}</strong>
           </div>
         )}
         {status === 'correct' && (
           <div className="mt-8 rounded-xl border-2 border-primary bg-storybook-green p-5 text-xl font-black text-foreground animate-in slide-in-from-bottom-4">
-            Tuyệt vời!
+            Chuẩn luôn!
           </div>
         )}
       </form>
@@ -145,7 +145,7 @@ const TypingStudy = ({ word, onNext, onMaster, disabled = false }) => {
           className="mx-auto mt-8"
         >
           <Crown className="w-4 h-4" />
-          Đã thuộc
+          Mình nhớ rồi
         </Button>
       )}
     </Panel>

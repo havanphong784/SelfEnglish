@@ -22,14 +22,14 @@ const ImportVocabulary = () => {
         const jsonData = JSON.parse(event.target.result);
         
         if (!Array.isArray(jsonData)) {
-          setError("File JSON phải là một mảng các object (Array of objects).");
+          setError('File JSON cần là một danh sách từ vựng.');
           setWordsPreview([]);
           return;
         }
 
         const isValid = jsonData.every(item => item.word && item.meaning);
         if (!isValid) {
-          setError("Mỗi từ vựng phải có ít nhất trường 'word' và 'meaning'.");
+          setError("Mỗi từ cần có ít nhất 'word' và 'meaning'.");
           setWordsPreview([]);
           return;
         }
@@ -42,7 +42,7 @@ const ImportVocabulary = () => {
         }
       } catch (err) {
         console.error('Lỗi khi đọc file:', err);
-        setError('File không đúng định dạng JSON hoặc có lỗi xảy ra.');
+        setError('File chưa đúng định dạng JSON. Kiểm tra lại rồi tải lên nhé.');
         setWordsPreview([]);
       }
     };
@@ -52,7 +52,7 @@ const ImportVocabulary = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (wordsPreview.length === 0) {
-      setError('Vui lòng upload file JSON chứa danh sách từ vựng.');
+      setError('Bạn cần tải lên file JSON chứa danh sách từ trước đã.');
       return;
     }
 
@@ -70,7 +70,7 @@ const ImportVocabulary = () => {
       navigate('/dashboard/vocabulary');
     } catch (err) {
       console.error('Lỗi khi lưu gói từ vựng:', err);
-      setError('Có lỗi xảy ra khi lưu gói từ vựng. Vui lòng thử lại sau.');
+      setError('Chưa lưu được gói từ. Thử lại sau một chút nhé.');
     } finally {
       setLoading(false);
     }
@@ -92,13 +92,13 @@ const ImportVocabulary = () => {
           onClick={() => navigate('/dashboard/vocabulary')}
           variant="ghost"
           size="icon"
-          aria-label="Quay lại thư viện"
+          aria-label="Quay lại kho từ"
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>
         <div>
-          <h1 className="se-page-title">Import từ vựng</h1>
-          <p className="se-body mt-2 text-sm">Tạo gói từ vựng mới nhanh chóng từ file JSON.</p>
+          <h1 className="se-page-title">Thêm gói từ vựng</h1>
+          <p className="se-body mt-2 text-sm">Tải file JSON lên để tạo gói từ mới. Nhanh gọn, khỏi nhập tay từng từ.</p>
         </div>
       </div>
 
@@ -106,23 +106,23 @@ const ImportVocabulary = () => {
         <form onSubmit={handleSubmit} className="space-y-8">
           
           <div>
-            <label className="se-label mb-2">Tên gói từ vựng</label>
+            <label className="se-label mb-2">Tên gói từ</label>
             <input 
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="se-input text-lg"
-              placeholder="VD: Từ vựng IELTS Core"
+              placeholder="VD: IELTS Core Words"
             />
           </div>
 
           <div className="space-y-4">
-            <label className="se-label mb-2">Dữ liệu JSON</label>
+            <label className="se-label mb-2">File từ vựng</label>
             <label className="block w-full cursor-pointer rounded-xl border-2 border-dashed border-primary bg-storybook-green py-10 text-center text-foreground transition-transform hover:-translate-y-1">
               <div className="flex flex-col items-center gap-3">
                 <Upload className="w-10 h-10 mb-1" />
-                <span className="text-lg font-black">Click để tải lên file JSON</span>
-                <span className="text-sm font-bold text-muted-foreground">Hoặc kéo thả file vào khung này</span>
+                <span className="text-lg font-black">Tải file JSON lên</span>
+                <span className="text-sm font-bold text-muted-foreground">Kéo thả vào đây cũng được, rất tiện.</span>
               </div>
               <input 
                 type="file" 
@@ -141,7 +141,7 @@ const ImportVocabulary = () => {
 
             {!wordsPreview.length && !error && (
               <div className="space-y-2 pt-2">
-                <p className="text-sm font-bold text-muted-foreground">Cấu trúc file mẫu:</p>
+                <p className="text-sm font-bold text-muted-foreground">File mẫu nên có dạng:</p>
                 <div className="rounded-xl border-2 border-night-ink bg-night-ink p-5 font-mono text-sm text-white overflow-x-auto">
                   <pre>{templateJson}</pre>
                 </div>
@@ -153,14 +153,14 @@ const ImportVocabulary = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-lg font-black text-primary">
                     <span className="w-2 h-2 rounded-full bg-primary"></span>
-                    Đã tải {wordsPreview.length} từ vựng
+                    Đã nhận {wordsPreview.length} từ
                   </h3>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto rounded-xl border-2 border-border bg-card">
                   <table className="se-table text-sm">
                     <thead className="sticky top-0">
                       <tr>
-                        <th>Từ vựng</th>
+                        <th>Từ tiếng Anh</th>
                         <th>Nghĩa</th>
                       </tr>
                     </thead>
@@ -186,7 +186,7 @@ const ImportVocabulary = () => {
           >
             {loading ? 'Đang xử lý...' : (
               <>
-                <Save className="w-6 h-6" /> Xác nhận Import
+                <Save className="w-6 h-6" /> Lưu gói từ
               </>
             )}
           </Button>

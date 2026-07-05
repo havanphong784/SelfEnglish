@@ -20,7 +20,7 @@ const levelLabels = {
   3: 'L3',
   4: 'L4',
   5: 'L5',
-  6: 'Master',
+  6: 'Thành thạo',
 };
 
 const emptyLevelDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
@@ -120,7 +120,7 @@ const Dashboard = () => {
         });
       } catch (loadError) {
         console.error('Failed to load dashboard data:', loadError);
-        setError('Không tải được dữ liệu dashboard.');
+      setError('Không tải được dữ liệu học tập. Thử lại sau một chút nhé.');
       } finally {
         setLoading(false);
       }
@@ -163,15 +163,15 @@ const Dashboard = () => {
               Hôm nay
             </Badge>
             <h1 className="se-page-title">
-              {dashboardData.userName ? `Chào ${dashboardData.userName}` : 'Bảng học tập'}
+              {dashboardData.userName ? `Chào ${dashboardData.userName}` : 'Tổng quan học tập'}
             </h1>
             <div className="mt-5 flex flex-wrap gap-3">
               <div className="rounded-xl border-2 border-primary bg-white px-4 py-3">
-                <div className="se-label text-[12px]">Từ hôm nay</div>
+                <div className="se-label text-[12px]">Từ mới hôm nay</div>
                 <div className="mt-1 font-secondary text-3xl font-black tabular-nums text-foreground">{dashboardData.todayLearned}</div>
               </div>
               <div className="rounded-xl border-2 border-primary bg-white px-4 py-3">
-                <div className="se-label text-[12px]">Tuần này</div>
+                <div className="se-label text-[12px]">Từ đã học tuần này</div>
                 <div className="mt-1 font-secondary text-3xl font-black tabular-nums text-foreground">{weeklyLearned}</div>
               </div>
             </div>
@@ -195,14 +195,14 @@ const Dashboard = () => {
       </Panel>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Từ đã học" value={dashboardData.totalWords} detail="Đã ghi vào sổ học" icon={BookOpen} />
-        <StatCard label="Chuỗi ngày" value={dashboardData.streak} detail="Ngày liên tiếp" icon={Flame} tone="warning" />
-        <StatCard label="Master" value={masteredWords} detail="Level 6" icon={Trophy} tone="green" />
-        <StatCard label="Ngày hoạt động" value={activeDays} detail="Trong 7 phiên gần nhất" icon={GraduationCap} tone="blue" />
+        <StatCard label="Tổng từ vựng" value={dashboardData.totalWords} detail="Đã lưu trong kho từ" icon={BookOpen} />
+        <StatCard label="Chuỗi học" value={dashboardData.streak} detail="Ngày học liên tiếp" icon={Flame} tone="warning" />
+        <StatCard label="Thành thạo" value={masteredWords} detail="Từ đã nắm chắc" icon={Trophy} tone="green" />
+        <StatCard label="Ngày có học" value={activeDays} detail="Trong 7 phiên gần nhất" icon={GraduationCap} tone="blue" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <ChartPanel title="Phiên gần đây" className="xl:col-span-2">
+        <ChartPanel title="Lịch học gần đây" className="xl:col-span-2">
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={recentSessions} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -221,7 +221,7 @@ const Dashboard = () => {
           </div>
         </ChartPanel>
 
-        <ChartPanel title="Phân bố cấp độ">
+        <ChartPanel title="Trình độ từ vựng">
           <div className="space-y-4">
             {levelRows.map((row) => {
               const percent = Math.round((row.value / maxLevelValue) * 100);

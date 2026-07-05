@@ -53,7 +53,7 @@ const VocabularyDashboard = () => {
 
   const startReview = () => {
     if (reviewCount === 0) {
-      alert('Bạn không có từ vựng nào cần ôn hôm nay!');
+      alert('Hôm nay chưa có từ nào cần ôn. Nice, bạn đang rất ổn!');
       return;
     }
     navigate('/dashboard/vocabulary/study?mode=review');
@@ -70,24 +70,24 @@ const VocabularyDashboard = () => {
   return (
     <div className="se-shell space-y-8 pb-12">
       <PageHeader
-        eyebrow="Không giới hạn tiềm năng"
+        eyebrow="Từ vựng mỗi ngày"
         icon={Sparkles}
-        title="Luyện"
-        highlight="Từ vựng"
-        description="Nắm vững từ mới bằng spaced repetition, giữ streak và quay lại đúng nhóm từ cần ôn."
+        title="Học"
+        highlight="từ vựng"
+        description="Học từ mới, ôn đúng lúc và giữ chuỗi học đều đặn. Mỗi phiên ngắn thôi nhưng vẫn lên trình."
         action={(
           <Button onClick={() => navigate('/dashboard/vocabulary/import')} variant="primary">
             <Plus className="h-5 w-5" aria-hidden="true" />
-            Import gói mới
+            Thêm gói từ
           </Button>
         )}
       />
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard label="Ngày streak" value={stats.streak || 0} detail="Liên tiếp" icon={Flame} tone="warning" />
-        <StatCard label="Từ đã học" value={stats.todayLearned || 0} detail="Hôm nay" icon={Target} tone="green" />
-        <StatCard label="Từ master" value={stats.levelDistribution?.[6] || 0} detail="Level 6" icon={Crown} tone="default" />
-        <StatCard label="Cần ôn tập" value={reviewCount} detail="Đến hạn hôm nay" icon={Clock} tone="blue" />
+        <StatCard label="Chuỗi học" value={stats.streak || 0} detail="Ngày liên tiếp" icon={Flame} tone="warning" />
+        <StatCard label="Từ mới" value={stats.todayLearned || 0} detail="Đã học hôm nay" icon={Target} tone="green" />
+        <StatCard label="Thành thạo" value={stats.levelDistribution?.[6] || 0} detail="Từ đã nắm chắc" icon={Crown} tone="default" />
+        <StatCard label="Cần ôn" value={reviewCount} detail="Đến lịch hôm nay" icon={Clock} tone="blue" />
       </div>
 
       <Panel className="se-panel-ink">
@@ -95,17 +95,17 @@ const VocabularyDashboard = () => {
           <div className="flex items-start gap-4">
             <IconSticker icon={BookOpen} className="border-white bg-white text-night-ink" />
             <div>
-              <div className="text-sm font-black uppercase tracking-[0.12em] text-fresh-leaf">Ôn tập đúng hạn</div>
+              <div className="text-sm font-black uppercase tracking-[0.12em] text-fresh-leaf">Đến giờ ôn rồi</div>
               <h2 className="mt-2 text-3xl font-black leading-tight text-white md:text-4xl">
-                {reviewCount} từ chờ ôn hôm nay
+                {reviewCount} từ cần ôn hôm nay
               </h2>
               <p className="mt-3 max-w-xl text-sm font-bold leading-relaxed text-white/75">
-                Một phiên ngắn ngay bây giờ sẽ giúp ký ức bền hơn và ngày mai nhẹ hơn.
+                Làm một phiên nhanh bây giờ để não giữ từ lâu hơn. Gọn, chill, không áp lực.
               </p>
             </div>
           </div>
           <Button onClick={startReview} variant="secondary" size="lg" className="w-full border-white bg-white md:w-auto">
-            Bắt đầu ôn tập
+            Ôn ngay
           </Button>
         </div>
       </Panel>
@@ -113,19 +113,19 @@ const VocabularyDashboard = () => {
       <section className="space-y-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="se-heading text-[clamp(30px,4vw,44px)]">Thư viện gói từ vựng</h2>
-            <p className="se-body mt-2 text-sm">Chọn một gói để học từ mới, luyện lại hoặc xem chi tiết tiến độ.</p>
+            <h2 className="se-heading text-[clamp(30px,4vw,44px)]">Kho từ vựng</h2>
+            <p className="se-body mt-2 text-sm">Chọn một gói để học từ mới, ôn lại hoặc xem tiến độ của bạn.</p>
           </div>
         </div>
 
         {packages.length === 0 ? (
           <Panel className="text-center">
             <IconSticker icon={BookOpen} className="mx-auto" />
-            <h3 className="mt-4 text-2xl font-black text-foreground">Chưa có gói từ vựng</h3>
-            <p className="se-body mx-auto mt-2 max-w-md text-sm">Import file JSON đầu tiên để bắt đầu xây thư viện học của bạn.</p>
+            <h3 className="mt-4 text-2xl font-black text-foreground">Chưa có gói từ nào</h3>
+            <p className="se-body mx-auto mt-2 max-w-md text-sm">Thêm file JSON đầu tiên để bắt đầu học từ vựng theo cách của bạn.</p>
             <Button onClick={() => navigate('/dashboard/vocabulary/import')} className="mt-6">
               <Plus className="h-5 w-5" aria-hidden="true" />
-              Import gói mới
+              Thêm gói từ
             </Button>
           </Panel>
         ) : (
@@ -166,12 +166,12 @@ const PackageCard = ({ pkg, index, onClick }) => {
               Pro
             </Badge>
           ) : (
-            <Badge>Free</Badge>
+            <Badge>Miễn phí</Badge>
           )}
         </div>
 
         <p className="line-clamp-3 text-sm font-bold leading-relaxed text-muted-foreground">
-          {pkg.description || 'Gói từ vựng chưa có mô tả. Thêm mô tả để biết nội dung chính của gói này.'}
+          {pkg.description || 'Gói từ này chưa có mô tả. Thêm mô tả để biết bạn sẽ học gì trong gói.'}
         </p>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -179,13 +179,13 @@ const PackageCard = ({ pkg, index, onClick }) => {
             <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
             {pkg.totalWords || 0} từ
           </Badge>
-          {pkg.level && <Badge tone="blue">Level {pkg.level}</Badge>}
+          {pkg.level && <Badge tone="blue">Trình độ {pkg.level}</Badge>}
         </div>
       </div>
 
       <div className="mt-6 space-y-3">
         <div className="flex justify-between text-xs font-black uppercase tracking-[0.08em] text-muted-foreground">
-          <span>Tiến độ</span>
+          <span>Tiến độ học</span>
           <span className="text-foreground">{pkg.learnedWords || 0} / {pkg.totalWords || 0}</span>
         </div>
         <ProgressBar value={progress} />

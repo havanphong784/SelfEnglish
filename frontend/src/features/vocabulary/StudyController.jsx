@@ -65,7 +65,7 @@ const StudyController = () => {
   }
 
   return (
-    <div className="se-shell grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+    <div className="se-shell grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
       <section className="min-w-0">
         <StudyHeader
           currentIndex={currentIndex}
@@ -87,7 +87,7 @@ const StudyController = () => {
         </div>
       </section>
 
-      <aside className="space-y-4 xl:sticky xl:top-4 xl:self-start">
+      <aside className="space-y-3 xl:sticky xl:top-3 xl:self-start">
         <SessionLedger summary={summary} totalWords={words.length} />
         <LevelPanel level={currentLevel} />
       </aside>
