@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Panel } from './components/ui/Primitives';
 
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 const Dashboard = lazy(() => import('./features/home/Dashboard'));
@@ -12,7 +13,19 @@ const Landing = lazy(() => import('./features/auth/Landing'));
 
 const PageFallback = () => (
   <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-storybook-green border-t-primary" />
+  </div>
+);
+
+const ComingSoon = ({ title }) => (
+  <div className="se-shell py-4">
+    <Panel className="text-center">
+      <div className="se-eyebrow mb-4">Sắp ra mắt</div>
+      <h1 className="se-page-title">{title}</h1>
+      <p className="se-body mx-auto mt-3 max-w-xl text-sm">
+        Khu vực này đang được chuẩn bị để đồng bộ với hệ học tập mới.
+      </p>
+    </Panel>
   </div>
 );
 
@@ -32,10 +45,10 @@ function App() {
                 <Route path="import" element={<ImportVocabulary />} />
                 <Route path="packages/:packageId" element={<PackageDetails />} />
               </Route>
-              <Route path="listening" element={<div className="p-4">Luyen nghe</div>} />
-              <Route path="speaking" element={<div className="p-4">Luyen noi</div>} />
-              <Route path="exams" element={<div className="p-4">Luyen de</div>} />
-              <Route path="statistics" element={<div className="p-4">Thong ke</div>} />
+              <Route path="listening" element={<ComingSoon title="Luyện nghe" />} />
+              <Route path="speaking" element={<ComingSoon title="Luyện nói" />} />
+              <Route path="exams" element={<ComingSoon title="Luyện đề" />} />
+              <Route path="statistics" element={<ComingSoon title="Thống kê" />} />
             </Route>
           </Route>
         </Routes>

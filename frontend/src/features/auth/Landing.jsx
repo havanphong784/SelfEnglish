@@ -1,10 +1,19 @@
+import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { BookOpenCheck, CheckCircle2, GraduationCap, Layers3, LineChart, Sparkles } from 'lucide-react';
+
 import { auth, googleProvider } from '../../config/firebase';
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { useState } from 'react';
+import { useAuth } from '../../contexts/authState';
 import { API_BASE_URL } from '../../utils/api';
-import { useAuth } from '../../contexts/AuthContext';
+import { Badge, Button, IconSticker, Panel } from '../../components/ui/Primitives';
+
+const features = [
+  { icon: Layers3, title: 'Flashcard sống động', text: 'Lật thẻ, nghe phát âm và ghi nhớ từ mới theo từng cấp độ.' },
+  { icon: LineChart, title: 'Tiến độ rõ ràng', text: 'Theo dõi từ đã học, chuỗi ngày và mục tiêu tuần trong một nơi.' },
+  { icon: GraduationCap, title: 'Ôn đúng lúc', text: 'Spaced repetition giúp bạn quay lại đúng nhóm từ cần củng cố.' },
+];
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -18,21 +27,19 @@ export default function Landing() {
   const handleFirebaseLogin = async (result) => {
     try {
       const idToken = await result.user.getIdToken(true);
-      
-      // Gửi token lên backend để xác thực và lấy thông tin User
+
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
       });
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.error || 'Dang nhap that bai');
+        throw new Error(data.error || 'Đăng nhập thất bại');
       }
 
       if (data.user) {
-        // Lưu token hoặc thông tin user vào localStorage/Context
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard', { replace: true });
       }
@@ -52,15 +59,14 @@ export default function Landing() {
     }
   };
 
-  const handleEmailAuth = async (e) => {
-    e.preventDefault();
+  const handleEmailAuth = async (event) => {
+    event.preventDefault();
     try {
-      let result;
-      if (isLogin) {
-        result = await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        result = await createUserWithEmailAndPassword(auth, email, password);
-      }
+      setError('');
+      const result = isLogin
+        ? await signInWithEmailAndPassword(auth, email, password)
+        : await createUserWithEmailAndPassword(auth, email, password);
+
       await handleFirebaseLogin(result);
     } catch (err) {
       console.error(err);
@@ -73,171 +79,152 @@ export default function Landing() {
   }
 
   return (
-    <main className="min-h-screen bg-background relative overflow-hidden flex flex-col md:flex-row font-sans">
-      {/* Animated Background Blobs */}
-      <motion.div 
-        animate={shouldReduceMotion ? false : { 
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-          x: [0, 50, 0],
-          y: [0, 30, 0]
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/30 blur-[150px] pointer-events-none" 
-      />
-      <motion.div 
-        animate={shouldReduceMotion ? false : { 
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
-          x: [0, -40, 0],
-          y: [0, -50, 0]
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent/30 blur-[150px] pointer-events-none" 
-      />
-
-      {/* Left side: Hero & Features */}
-      <div className="md:w-1/2 p-6 md:p-12 flex flex-col justify-center items-start space-y-6 md:space-y-8 relative z-10 mt-10 md:mt-0">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-xs md:text-sm mb-2 md:mb-4 shadow-sm"
-        >
-          🚀 Nền tảng học tiếng Anh thế hệ mới
-        </motion.div>
-        
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-4xl md:text-6xl font-bold bg-gradient-to-br from-primary via-accent to-purple-500 bg-clip-text text-transparent font-secondary leading-tight"
-        >
-          SelfEnglish
-        </motion.h1>
-        
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-base md:text-xl text-muted-foreground max-w-md leading-relaxed"
-        >
-          Trải nghiệm phương pháp tự học tiếng Anh thông minh với <strong className="text-primary">Flashcard 3D</strong>, luyện nghe phát âm chuẩn và hệ thống thống kê trực quan.
-        </motion.p>
-
-        <div className="space-y-3 md:space-y-4 w-full max-w-md mt-6 md:mt-8">
-          <FeatureItem text="✨ Học từ vựng sinh động với Flashcard 3D" delay={0.4} />
-          <FeatureItem text="📈 Phân tích tiến độ qua Activity Chart trực quan" delay={0.5} />
-          <FeatureItem text="🎧 Luyện nghe & phát âm chuẩn với Web Speech API" delay={0.6} />
+    <main className="min-h-screen bg-background font-sans">
+      <header className="se-shell flex items-center justify-between px-4 py-5">
+        <div className="flex items-center gap-3">
+          <IconSticker icon={BookOpenCheck} className="border-primary bg-storybook-green" />
+          <span className="text-lg font-black text-foreground">SelfEnglish</span>
         </div>
-      </div>
+        <Badge tone="blue">Tiếng Việt</Badge>
+      </header>
 
-      {/* Right side: Login Form */}
-      <div className="md:w-1/2 p-6 md:p-12 flex items-center justify-center relative z-10 mb-10 md:mb-0">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="w-full max-w-md glass-panel p-6 md:p-10 rounded-3xl"
-        >
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2 text-foreground font-secondary">
-              {isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản'}
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              {isLogin ? 'Chào mừng bạn quay trở lại với SelfEnglish' : 'Bắt đầu hành trình chinh phục tiếng Anh'}
+      <section className="se-shell grid min-h-[calc(100vh-84px)] gap-10 px-4 pb-12 pt-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+        <div className="space-y-8">
+          <div className="max-w-2xl">
+            <div className="se-eyebrow mb-4">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              Học tiếng Anh mỗi ngày
+            </div>
+            <motion.h1
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+              animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+              className="se-heading-display"
+            >
+              SelfEnglish
+            </motion.h1>
+            <p className="se-body mt-5 max-w-xl">
+              Tự học từ vựng, luyện phát âm và ôn tập ngắt quãng trong một không gian trắng, vui và đủ rõ để bạn quay lại mỗi ngày.
             </p>
           </div>
-          
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {features.map((feature) => (
+              <FeatureItem key={feature.title} {...feature} />
+            ))}
+          </div>
+
+          <div className="grid max-w-2xl gap-4 sm:grid-cols-3">
+            <MiniStat label="Từ hôm nay" value="12" />
+            <MiniStat label="Streak" value="7" tone="green" />
+            <MiniStat label="Review" value="24" tone="blue" />
+          </div>
+        </div>
+
+        <Panel className="p-6 md:p-8">
+          <div className="mb-8 text-center">
+            <Badge tone="green" className="mb-4">
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              Bắt đầu ngay
+            </Badge>
+            <h2 className="text-3xl font-black text-foreground">
+              {isLogin ? 'Đăng nhập' : 'Tạo tài khoản'}
+            </h2>
+            <p className="se-body mt-2 text-sm">
+              {isLogin ? 'Chào mừng bạn quay trở lại.' : 'Tạo tài khoản để lưu tiến độ học.'}
+            </p>
+          </div>
+
           {error && (
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded-xl mb-6 text-sm text-center"
-            >
+            <div className="mb-6 rounded-xl border-2 border-[#ffc9c9] bg-[#fff2f2] p-3 text-center text-sm font-bold text-danger">
               {error}
-            </motion.div>
+            </div>
           )}
 
           <form onSubmit={handleEmailAuth} className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5 ml-1">Email</label>
-              <input 
+              <label htmlFor="email" className="se-label mb-2">Email</label>
+              <input
                 id="email"
-                type="email" 
+                type="email"
                 autoComplete="email"
                 required
                 value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all placeholder:text-muted-foreground/50"
+                onChange={(event) => setEmail(event.target.value)}
+                className="se-input"
                 placeholder="name@example.com"
               />
             </div>
+
             <div>
-              <div className="flex justify-between items-center mb-1.5 ml-1">
-                <label htmlFor="password" className="block text-sm font-medium text-foreground">Mật khẩu</label>
-                {isLogin && <a href="#" className="text-xs text-primary hover:underline">Quên mật khẩu?</a>}
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <label htmlFor="password" className="se-label">Mật khẩu</label>
+                {isLogin && (
+                  <button type="button" className="min-h-11 px-1 text-sm font-extrabold text-accent hover:underline">
+                    Quên mật khẩu?
+                  </button>
+                )}
               </div>
-              <input 
+              <input
                 id="password"
-                type="password" 
+                type="password"
                 autoComplete={isLogin ? 'current-password' : 'new-password'}
                 required
                 value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-all placeholder:text-muted-foreground/50"
+                onChange={(event) => setPassword(event.target.value)}
+                className="se-input"
                 placeholder="••••••••"
               />
             </div>
-            <button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5"
-            >
-              {isLogin ? 'Đăng Nhập' : 'Đăng Ký'}
-            </button>
+
+            <Button type="submit" size="lg" className="w-full">
+              {isLogin ? 'Đăng nhập' : 'Đăng ký'}
+            </Button>
           </form>
 
-          <div className="mt-8 flex items-center">
-            <div className="flex-1 border-t border-border"></div>
-            <span className="px-4 text-muted-foreground text-xs uppercase tracking-wider font-medium">Hoặc tiếp tục với</span>
-            <div className="flex-1 border-t border-border"></div>
+          <div className="my-7 flex items-center gap-3">
+            <div className="h-0.5 flex-1 bg-border" />
+            <span className="text-xs font-black uppercase tracking-[0.12em] text-muted-foreground">hoặc</span>
+            <div className="h-0.5 flex-1 bg-border" />
           </div>
 
-          <button 
-            onClick={signInWithGoogle}
-            type="button"
-            className="w-full mt-8 bg-card/50 hover:bg-card border border-white/10 text-foreground font-medium py-3 rounded-xl transition-all flex items-center justify-center space-x-3 group"
-          >
-            <svg aria-hidden="true" className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+          <Button onClick={signInWithGoogle} variant="secondary" size="lg" className="w-full">
+            <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z" />
             </svg>
-            <span>Google</span>
-          </button>
+            Tiếp tục với Google
+          </Button>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
+          <p className="mt-8 text-center text-sm font-bold text-muted-foreground">
             {isLogin ? 'Chưa có tài khoản? ' : 'Đã có tài khoản? '}
-            <button 
-              onClick={() => setIsLogin(!isLogin)} 
-              type="button"
-              className="text-primary font-semibold hover:underline"
-            >
+            <button onClick={() => setIsLogin((value) => !value)} type="button" className="min-h-11 px-1 font-black text-accent hover:underline">
               {isLogin ? 'Tạo ngay' : 'Đăng nhập'}
             </button>
           </p>
-        </motion.div>
-      </div>
+        </Panel>
+      </section>
     </main>
   );
 }
 
-function FeatureItem({ text, delay }) {
+const FeatureItem = ({ icon: Icon, title, text }) => (
+  <div className="se-card min-h-[150px]">
+    <IconSticker icon={Icon} />
+    <h3 className="mt-4 text-lg font-black text-foreground">{title}</h3>
+    <p className="mt-2 text-sm font-bold leading-relaxed text-muted-foreground">{text}</p>
+  </div>
+);
+
+const MiniStat = ({ label, value, tone = 'default' }) => {
+  const toneClass = {
+    default: 'border-border bg-card',
+    green: 'border-primary bg-storybook-green',
+    blue: 'border-accent bg-card text-accent',
+  }[tone];
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay }}
-      className="flex items-center space-x-4 glass-panel p-4 rounded-2xl hover:-translate-y-1 hover:shadow-primary/10 transition-all cursor-default"
-    >
-      <div className="w-2 h-8 rounded-full bg-gradient-to-b from-primary to-accent"></div>
-      <span className="text-foreground font-medium">{text}</span>
-    </motion.div>
+    <div className={`rounded-xl border-2 p-4 ${toneClass}`}>
+      <div className="se-label text-[12px]">{label}</div>
+      <div className="se-stat-value mt-4 text-[42px]">{value}</div>
+    </div>
   );
-}
+};

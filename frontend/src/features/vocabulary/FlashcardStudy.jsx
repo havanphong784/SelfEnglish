@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronLeft, ChevronRight, Crown, Lightbulb, Repeat, Volume2, X } from 'lucide-react';
+import { Button, Kbd } from '../../components/ui/Primitives';
 
 const ratings = [
   {
@@ -9,7 +10,7 @@ const ratings = [
     effect: 'Cần ôn lại',
     shortcuts: ['1', '←'],
     icon: X,
-    classes: 'border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100',
+    classes: 'border-[#ffc9c9] bg-[#fff2f2] text-danger hover:border-danger',
   },
   {
     value: true,
@@ -17,20 +18,12 @@ const ratings = [
     effect: 'Tăng cấp',
     shortcuts: ['2', '→'],
     icon: Check,
-    classes: 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100',
+    classes: 'border-primary bg-storybook-green text-foreground hover:bg-fresh-leaf',
   },
 ];
 
 const ShortcutKey = ({ children, dark = false }) => (
-  <kbd
-    className={`inline-flex h-6 min-w-6 items-center justify-center rounded-md border px-1.5 font-mono text-[11px] font-black leading-none shadow-sm ${
-      dark
-        ? 'border-white/20 bg-white/15 text-white'
-        : 'border-border bg-white/80 text-muted-foreground'
-    }`}
-  >
-    {children}
-  </kbd>
+  <Kbd className={dark ? 'border-white bg-white text-night-ink' : ''}>{children}</Kbd>
 );
 
 const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
@@ -100,8 +93,8 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
   const audioButton = (dark = false) => (
     <button
       onClick={(event) => playAudio(event, word.word)}
-      className={`absolute right-6 top-6 rounded-full p-3 transition-transform hover:scale-110 active:scale-95 md:right-8 md:top-8 md:p-4 ${
-        dark ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'
+      className={`absolute right-6 top-6 flex h-12 w-12 items-center justify-center rounded-xl border-2 transition-transform hover:scale-105 active:scale-95 md:right-8 md:top-8 ${
+        dark ? 'border-white bg-white text-night-ink' : 'border-primary bg-storybook-green text-primary'
       }`}
       title="Nghe phát âm"
       type="button"
@@ -112,35 +105,35 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
 
   const englishCard = (back = false) => (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center rounded-[2rem] border border-primary/10 bg-gradient-to-br from-white to-primary/5 p-8 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] [backface-visibility:hidden] md:p-12"
+      className="absolute inset-0 flex flex-col items-center justify-center rounded-xl border-2 border-border bg-card p-8 [backface-visibility:hidden] md:p-12"
       style={back ? { transform: 'rotateY(180deg)' } : undefined}
     >
       {audioButton()}
 
       {word.partOfSpeech && (
-        <span className="mb-6 rounded-full bg-primary px-4 py-1.5 text-xs font-bold tracking-wider text-primary-foreground shadow-md shadow-primary/20 md:text-sm">
+        <span className="mb-6 rounded-xl border-2 border-primary bg-primary px-4 py-1.5 text-xs font-bold tracking-wider text-primary-foreground md:text-sm">
           {word.partOfSpeech.toUpperCase()}
         </span>
       )}
 
-      <h2 className="mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-center text-4xl font-black tracking-tight text-transparent md:text-7xl">
+      <h2 className="mb-6 text-center font-secondary text-4xl font-black tracking-tight text-foreground md:text-7xl">
         {word.word}
       </h2>
 
       {word.ipa && (
-        <p className="rounded-2xl border border-border/50 bg-white/70 px-5 py-2 font-mono text-lg font-medium text-muted-foreground shadow-sm md:text-2xl">
+        <p className="rounded-xl border-2 border-border bg-muted px-5 py-2 font-mono text-lg font-bold text-muted-foreground md:text-2xl">
           {word.ipa}
         </p>
       )}
 
       {word.example && back && (
-        <div className="mt-8 w-full max-w-xl rounded-3xl border border-primary/10 bg-primary/5 p-6 text-center shadow-sm md:p-8">
-          <p className="text-lg font-medium italic leading-relaxed text-foreground md:text-2xl">"{word.example}"</p>
+        <div className="mt-8 w-full max-w-xl rounded-xl border-2 border-primary bg-storybook-green p-6 text-center md:p-8">
+          <p className="text-lg font-bold italic leading-relaxed text-foreground md:text-2xl">"{word.example}"</p>
         </div>
       )}
 
       {Array.isArray(word.synonyms) && word.synonyms.length > 0 && !back && (
-        <div className="absolute bottom-8 left-8 right-8 rounded-2xl border border-primary/10 bg-white/70 p-4 text-center shadow-sm backdrop-blur-sm">
+        <div className="absolute bottom-8 left-8 right-8 rounded-xl border-2 border-border bg-white p-4 text-center">
           <p className="text-sm font-medium text-foreground/80 md:text-base">
             <span className="mr-2 font-bold text-primary">Đồng nghĩa:</span>{word.synonyms.join(', ')}
           </p>
@@ -151,18 +144,18 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
 
   const meaningCard = (back = false) => (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center rounded-[2rem] border border-primary/20 bg-gradient-to-br from-primary to-indigo-600 p-8 shadow-[0_20px_50px_-12px_rgba(67,24,255,0.35)] [backface-visibility:hidden] md:p-12"
+      className="absolute inset-0 flex flex-col items-center justify-center rounded-xl border-2 border-primary bg-primary p-8 [backface-visibility:hidden] md:p-12"
       style={back ? { transform: 'rotateY(180deg)' } : undefined}
     >
       {!back && reverseMode ? null : audioButton(true)}
 
-      <h3 className="mb-8 text-center text-3xl font-bold leading-tight tracking-tight text-white drop-shadow-md md:text-5xl">
+      <h3 className="mb-8 text-center text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
         {word.meaning}
       </h3>
 
       {word.example && !reverseMode && (
-        <div className="w-full max-w-xl rounded-3xl border border-white/20 bg-white/10 p-6 text-center shadow-2xl backdrop-blur-md md:p-8">
-          <p className="text-lg font-medium italic leading-relaxed text-white drop-shadow-sm md:text-2xl">"{word.example}"</p>
+        <div className="w-full max-w-xl rounded-xl border-2 border-white bg-white/15 p-6 text-center md:p-8">
+          <p className="text-lg font-bold italic leading-relaxed text-white md:text-2xl">"{word.example}"</p>
         </div>
       )}
 
@@ -172,17 +165,17 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
             event.stopPropagation();
             setShowHint(true);
           }}
-          className="mt-6 flex items-center gap-3 rounded-2xl border border-white/30 bg-white/20 px-8 py-4 font-bold text-white shadow-xl backdrop-blur-md transition-transform hover:scale-105 active:scale-95"
+          className="mt-6 flex items-center gap-3 rounded-xl border-2 border-white bg-white/15 px-8 py-4 font-bold text-white transition-transform hover:scale-105 active:scale-95"
           type="button"
         >
-          <Lightbulb className="h-6 w-6 text-yellow-300 drop-shadow-sm" />
+          <Lightbulb className="h-6 w-6 text-[#fff9da]" />
           Gợi ý
         </button>
       )}
 
       {reverseMode && showHint && (
-        <div className="mt-4 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-inner backdrop-blur-md">
-          <p className="font-mono text-3xl font-bold tracking-[0.4em] text-white drop-shadow-md md:text-4xl">
+        <div className="mt-4 rounded-xl border-2 border-white bg-white/15 p-6">
+          <p className="font-mono text-3xl font-bold tracking-[0.4em] text-white md:text-4xl">
             {word.word[0].toUpperCase()}{Array(Math.max(word.word.length - 1, 0)).fill('_').join(' ')}
           </p>
         </div>
@@ -193,27 +186,23 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col items-center py-4">
       <div className="mb-8 flex w-full items-center justify-between gap-3 px-1 sm:px-4">
-        <button
+        <Button
           onClick={() => setReverseMode((prev) => !prev)}
-          className={`flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
-            reverseMode ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-          }`}
-          type="button"
+          variant={reverseMode ? 'primary' : 'secondary'}
+          size="sm"
         >
           <Repeat className="h-4 w-4" />
           {reverseMode ? 'Nghĩa -> từ' : 'Từ -> nghĩa'}
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={() => setAutoPlay((prev) => !prev)}
-          className={`flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
-            autoPlay ? 'border border-primary/20 bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground hover:bg-secondary/80'
-          }`}
-          type="button"
+          variant={autoPlay ? 'soft' : 'secondary'}
+          size="sm"
         >
           <Volume2 className={`h-4 w-4 ${!autoPlay ? 'opacity-50' : ''}`} />
           Tự đọc: {autoPlay ? 'Bật' : 'Tắt'}
-        </button>
+        </Button>
       </div>
 
       <div
@@ -239,7 +228,7 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               onClick={() => setIsFlipped(true)}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground shadow-sm transition-colors hover:bg-muted"
+              className="se-button se-button-secondary se-button-md"
               type="button"
             >
               <Repeat className="h-4 w-4" />
@@ -264,10 +253,10 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
                         handleAction(rating.value);
                       }}
                       disabled={disabled}
-                      className={`group flex min-h-[96px] items-center gap-3 rounded-2xl border-2 p-3 font-bold shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 ${rating.classes}`}
+                      className={`group flex min-h-[96px] items-center gap-3 rounded-xl border-2 p-3 font-bold transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 ${rating.classes}`}
                       type="button"
                     >
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/60 shadow-sm">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border-2 border-current bg-white/60">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="flex min-w-0 flex-col items-start">
@@ -291,7 +280,7 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
                     handleAction({ action: 'prev' });
                   }}
                   disabled={disabled}
-                  className="flex min-h-10 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
+                  className="se-button se-button-secondary se-button-sm disabled:cursor-wait disabled:opacity-60"
                   type="button"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -304,7 +293,7 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
                     handleAction({ action: 'next' });
                   }}
                   disabled={disabled}
-                  className="flex min-h-10 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
+                  className="se-button se-button-secondary se-button-sm disabled:cursor-wait disabled:opacity-60"
                   type="button"
                 >
                   Bỏ qua
@@ -318,7 +307,7 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
                       onMaster();
                     }}
                     disabled={disabled}
-                    className="flex min-h-10 items-center gap-2 rounded-full border border-pink-100 bg-pink-50 px-5 py-2.5 text-sm font-bold text-pink-600 transition-colors hover:bg-pink-100 disabled:cursor-wait disabled:opacity-60"
+                    className="se-button se-button-soft se-button-sm disabled:cursor-wait disabled:opacity-60"
                     type="button"
                   >
                     <Crown className="h-4 w-4" />

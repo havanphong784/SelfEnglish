@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Check, CheckCircle, Crown, X, XCircle } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
+import { Button, Panel } from '../../components/ui/Primitives';
 
 const normalizeSynonyms = (synonyms) => {
   if (Array.isArray(synonyms)) return synonyms;
@@ -101,20 +102,20 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
   }, []);
 
   if (isLoadingOptions) {
-    return <div className="text-center py-10">Đang tạo câu hỏi...</div>;
+    return <div className="py-10 text-center font-bold text-muted-foreground">Đang tạo câu hỏi...</div>;
   }
 
   if (options.length < 2) {
     return (
-      <div className="mx-auto max-w-2xl rounded-3xl border-2 border-border bg-card p-10 text-center shadow-sm">
-        <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">Tự đánh giá</p>
-        <h2 className="mb-4 text-5xl font-black tracking-tight text-primary">{word.word}</h2>
+      <Panel className="mx-auto max-w-2xl text-center">
+        <p className="se-label mb-4 justify-center">Tự đánh giá</p>
+        <h2 className="mb-4 font-secondary text-5xl font-black tracking-tight text-primary">{word.word}</h2>
         <p className="mx-auto mb-8 max-w-lg text-2xl font-bold leading-snug text-foreground">"{word.meaning}"</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <button
             onClick={() => onNext(false)}
             disabled={disabled}
-            className="flex min-h-[80px] items-center justify-center gap-3 rounded-2xl border-2 border-amber-200 bg-amber-50 p-4 font-bold text-amber-700 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+            className="flex min-h-[80px] items-center justify-center gap-3 rounded-xl border-2 border-[#f2d15b] bg-[#fff9da] p-4 font-bold text-[#8a6200] transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
             type="button"
           >
             <X className="h-5 w-5" />
@@ -123,7 +124,7 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
           <button
             onClick={() => onNext(true)}
             disabled={disabled}
-            className="flex min-h-[80px] items-center justify-center gap-3 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-700 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+            className="flex min-h-[80px] items-center justify-center gap-3 rounded-xl border-2 border-primary bg-storybook-green p-4 font-bold text-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
             type="button"
           >
             <Check className="h-5 w-5" />
@@ -131,38 +132,38 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
           </button>
         </div>
         {onMaster && (
-          <button
+          <Button
             onClick={onMaster}
             disabled={disabled}
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-pink-500/10 px-6 py-2.5 text-sm font-bold text-pink-500 transition-colors hover:bg-pink-500/20 disabled:cursor-wait disabled:opacity-60"
-            type="button"
+            variant="soft"
+            className="mt-8"
           >
             <Crown className="h-4 w-4" />
             Đã thuộc
-          </button>
+          </Button>
         )}
-      </div>
+      </Panel>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl rounded-3xl border-2 border-border bg-card p-10 text-center shadow-sm">
-      <h2 className="mb-12 text-5xl font-black tracking-tight text-primary">{word.word}</h2>
+    <Panel className="mx-auto max-w-2xl text-center">
+      <h2 className="mb-12 font-secondary text-5xl font-black tracking-tight text-primary">{word.word}</h2>
 
       <div className="grid grid-cols-1 gap-4">
         {options.map((option, idx) => {
-          let btnClass = 'p-5 border-2 rounded-2xl text-lg font-medium transition-all text-left flex justify-between items-center group';
+          let btnClass = 'p-5 border-2 rounded-xl text-lg font-bold transition-all text-left flex justify-between items-center group';
 
           if (selectedAnswer !== null) {
             if (option.id === word.id) {
-              btnClass += ' bg-green-500/10 border-green-500 text-green-700';
+              btnClass += ' bg-storybook-green border-primary text-foreground';
             } else if (selectedAnswer.id === option.id) {
-              btnClass += ' bg-red-500/10 border-red-500 text-red-700';
+              btnClass += ' bg-[#fff2f2] border-danger text-danger';
             } else {
               btnClass += ' opacity-50 bg-card border-border';
             }
           } else {
-            btnClass += ' bg-card hover:border-primary/50 hover:bg-primary/5 cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5';
+            btnClass += ' bg-card hover:border-primary hover:bg-storybook-green cursor-pointer hover:-translate-y-0.5';
           }
 
           return (
@@ -174,25 +175,25 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
               type="button"
             >
               <span><span className="mr-2 font-bold opacity-50">{idx + 1}.</span> {option.meaning}</span>
-              {selectedAnswer !== null && option.id === word.id && <CheckCircle className="text-green-600" />}
-              {selectedAnswer !== null && selectedAnswer.id === option.id && option.id !== word.id && <XCircle className="text-red-600" />}
+              {selectedAnswer !== null && option.id === word.id && <CheckCircle className="text-primary" />}
+              {selectedAnswer !== null && selectedAnswer.id === option.id && option.id !== word.id && <XCircle className="text-danger" />}
             </button>
           );
         })}
       </div>
 
       {onMaster && selectedAnswer === null && (
-        <button
+        <Button
           onClick={onMaster}
           disabled={disabled}
-          className="mx-auto mt-8 flex items-center justify-center gap-2 rounded-full bg-pink-500/10 px-6 py-2.5 text-sm font-bold text-pink-500 transition-colors hover:bg-pink-500/20 hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60"
-          type="button"
+          variant="soft"
+          className="mx-auto mt-8"
         >
           <Crown className="h-4 w-4" />
           Đã thuộc
-        </button>
+        </Button>
       )}
-    </div>
+    </Panel>
   );
 };
 

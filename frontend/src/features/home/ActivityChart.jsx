@@ -5,17 +5,17 @@ const ActivityChart = () => {
   
   const getIntensityColor = (level) => {
     switch(level) {
-      case 1: return 'bg-green-200 dark:bg-green-900/40';
-      case 2: return 'bg-green-400 dark:bg-green-700/60';
-      case 3: return 'bg-green-600 dark:bg-green-500/80';
-      case 4: return 'bg-green-800 dark:bg-green-400';
+      case 1: return 'bg-storybook-green';
+      case 2: return 'bg-fresh-leaf';
+      case 3: return 'bg-primary';
+      case 4: return 'bg-night-ink';
       default: return 'bg-secondary';
     }
   };
 
   return (
     <div className="h-full w-full flex flex-col">
-      <h3 className="text-lg font-semibold mb-4 text-foreground">Mức độ hoạt động</h3>
+      <h3 className="se-label mb-4 text-foreground">Mức độ hoạt động</h3>
       <div className="flex-1 flex items-center justify-center overflow-x-auto py-2">
         <div className="flex gap-1.5">
           {Array.from({ length: weeks }).map((_, w) => (
@@ -26,7 +26,7 @@ const ActivityChart = () => {
                 return (
                   <div 
                     key={`${w}-${d}`} 
-                    className={`w-4 h-4 rounded-sm ${getIntensityColor(level)} hover:ring-2 hover:ring-primary transition-all cursor-pointer`}
+                    className={`h-4 w-4 rounded-sm border border-border ${getIntensityColor(level)} transition-transform hover:scale-110`}
                     title={`Hoạt động mức ${level}`}
                   />
                 )

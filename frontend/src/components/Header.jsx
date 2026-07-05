@@ -1,67 +1,57 @@
-import { Bell, Search, Mail, ChevronDown } from 'lucide-react';
+import { Bell, BookOpenCheck, ChevronDown, Mail, Search } from 'lucide-react';
+import { Button } from './ui/Primitives';
 
-const Header = () => {
-  return (
-    <header className="pt-6 md:pt-8 pb-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 md:gap-6 z-50 bg-background px-4 md:px-6">
-      {/* Title Section */}
-      <div className="flex-1 w-full flex justify-between items-start">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1 md:mb-2 font-secondary">Chào Học viên!</h1>
-          <p className="text-xs md:text-sm text-muted-foreground max-w-md leading-relaxed hidden sm:block">
-            Đo lường sự tiến bộ của bạn mỗi ngày và theo dõi các chỉ số học tập để đạt kết quả tốt nhất.
+const Header = () => (
+  <header className="bg-background px-4 py-4 md:px-6 md:py-6">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex min-w-0 items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="se-eyebrow mb-2">
+            <BookOpenCheck className="h-4 w-4" aria-hidden="true" />
+            SelfEnglish
+          </div>
+          <h1 className="se-page-title text-[clamp(28px,4vw,38px)]">Chào học viên!</h1>
+          <p className="se-body mt-2 hidden max-w-xl text-sm sm:block">
+            Theo dõi tiến độ, ôn đúng hạn và giữ nhịp học tiếng Anh mỗi ngày.
           </p>
         </div>
-        
-        {/* Mobile Avatar (Visible only on small screens without space) */}
-        <button type="button" aria-label="Mở hồ sơ người dùng" className="lg:hidden w-10 h-10 rounded-full bg-indigo-100 overflow-hidden cursor-pointer border-2 border-white soft-shadow-sm shrink-0">
-           <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="" className="w-full h-full object-cover" />
+
+        <button type="button" aria-label="Mở hồ sơ người dùng" className="se-avatar flex h-11 w-11 shrink-0 items-center justify-center text-sm font-black text-foreground lg:hidden">
+          SE
         </button>
       </div>
-      
-      {/* Controls Section */}
-      <div className="flex flex-wrap items-center gap-3 md:gap-6 w-full lg:w-auto">
-        
-        {/* Filters & Search */}
-        <div className="flex items-center gap-2 md:gap-3 flex-1 lg:flex-none">
-          <button type="button" aria-label="Chọn khoảng thời gian thống kê" className="hidden sm:flex items-center gap-2 bg-white px-4 py-2.5 rounded-2xl text-sm font-semibold text-muted-foreground soft-shadow-sm hover:text-foreground transition-colors shrink-0">
-            Năm nay <ChevronDown className="w-4 h-4" />
-          </button>
-          
-          <div className="flex items-center bg-white rounded-2xl px-4 py-2.5 w-full md:w-64 soft-shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all flex-1">
-            <Search className="w-4 h-4 text-muted-foreground mr-2 shrink-0" />
-            <input 
-              type="text" 
-              aria-label="Tìm kiếm"
-              placeholder="Tìm kiếm..." 
-              className="bg-transparent border-none outline-none text-sm w-full text-foreground placeholder:text-muted-foreground font-medium"
-            />
-          </div>
-        </div>
 
-        {/* Language & Actions (Hidden on very small screens, visible on md+) */}
-        <div className="hidden sm:flex items-center gap-4 border-l border-border pl-4 md:pl-6">
-          <button type="button" aria-label="Chọn ngôn ngữ" className="flex items-center gap-2 text-sm font-semibold text-foreground hover:opacity-80">
-            <img src="https://flagcdn.com/w20/vn.png" alt="" className="w-5 rounded-sm shrink-0" />
-            <span className="hidden md:inline">Tiếng Việt</span> <ChevronDown className="w-4 h-4 text-muted-foreground" />
+      <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+        <Button variant="secondary" size="sm" className="hidden sm:inline-flex">
+          Năm nay
+          <ChevronDown className="h-4 w-4" aria-hidden="true" />
+        </Button>
+
+        <label className="relative min-w-[220px] flex-1 lg:w-72 lg:flex-none">
+          <span className="sr-only">Tìm kiếm</span>
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <input type="text" placeholder="Tìm kiếm..." className="se-input pl-11" />
+        </label>
+
+        <div className="hidden items-center gap-3 sm:flex">
+          <Button variant="ghost" size="sm">
+            Tiếng Việt
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          </Button>
+          <Button variant="secondary" size="icon" aria-label="Mở hộp thư">
+            <Mail className="h-5 w-5" aria-hidden="true" />
+          </Button>
+          <Button variant="secondary" size="icon" aria-label="Mở thông báo" className="relative">
+            <Bell className="h-5 w-5" aria-hidden="true" />
+            <span aria-hidden="true" className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-danger" />
+          </Button>
+          <button type="button" aria-label="Mở hồ sơ người dùng" className="se-avatar hidden h-11 w-11 shrink-0 items-center justify-center text-sm font-black text-foreground lg:flex">
+            SE
           </button>
-          
-          <div className="flex items-center gap-2 md:gap-3 ml-1 md:ml-2">
-            <button type="button" aria-label="Mở hộp thư" className="w-10 h-10 rounded-full bg-white flex items-center justify-center soft-shadow-sm text-muted-foreground hover:text-primary transition-colors shrink-0">
-              <Mail className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-            <button type="button" aria-label="Mở thông báo" className="w-10 h-10 rounded-full bg-white flex items-center justify-center soft-shadow-sm text-muted-foreground hover:text-primary transition-colors relative shrink-0">
-              <Bell className="w-4 h-4 md:w-5 md:h-5" />
-              <span aria-hidden="true" className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-            
-            <button type="button" aria-label="Mở hồ sơ người dùng" className="hidden lg:block w-10 h-10 rounded-full bg-indigo-100 ml-1 md:ml-2 overflow-hidden cursor-pointer border-2 border-white soft-shadow-sm shrink-0">
-               <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="" className="w-full h-full object-cover" />
-            </button>
-          </div>
         </div>
       </div>
-    </header>
-  );
-};
+    </div>
+  </header>
+);
 
 export default Header;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, Save, AlertCircle } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
+import { Button, Panel } from '../../components/ui/Primitives';
 
 const ImportVocabulary = () => {
   const navigate = useNavigate();
@@ -85,41 +86,43 @@ const ImportVocabulary = () => {
 ]`;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="se-shell max-w-3xl space-y-8 pb-12">
       <div className="flex items-center gap-4">
-        <button 
+        <Button
           onClick={() => navigate('/dashboard/vocabulary')}
-          className="p-2 hover:bg-secondary rounded-full transition-colors"
+          variant="ghost"
+          size="icon"
+          aria-label="Quay lại thư viện"
         >
           <ArrowLeft className="w-6 h-6" />
-        </button>
+        </Button>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Import từ vựng</h1>
-          <p className="text-muted-foreground">Tạo gói từ vựng mới nhanh chóng từ file JSON.</p>
+          <h1 className="se-page-title">Import từ vựng</h1>
+          <p className="se-body mt-2 text-sm">Tạo gói từ vựng mới nhanh chóng từ file JSON.</p>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
+      <Panel>
         <form onSubmit={handleSubmit} className="space-y-8">
           
           <div>
-            <label className="block text-sm font-semibold mb-2">Tên gói từ vựng</label>
+            <label className="se-label mb-2">Tên gói từ vựng</label>
             <input 
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-4 bg-secondary/50 border border-border rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-lg"
+              className="se-input text-lg"
               placeholder="VD: Từ vựng IELTS Core"
             />
           </div>
 
           <div className="space-y-4">
-            <label className="block text-sm font-semibold mb-2">Dữ liệu JSON</label>
-            <label className="block w-full cursor-pointer bg-primary/5 hover:bg-primary/10 border-2 border-dashed border-primary/30 hover:border-primary/50 text-primary text-center py-10 rounded-2xl transition-all">
+            <label className="se-label mb-2">Dữ liệu JSON</label>
+            <label className="block w-full cursor-pointer rounded-xl border-2 border-dashed border-primary bg-storybook-green py-10 text-center text-foreground transition-transform hover:-translate-y-1">
               <div className="flex flex-col items-center gap-3">
                 <Upload className="w-10 h-10 mb-1" />
-                <span className="font-bold text-lg">Click để tải lên file JSON</span>
-                <span className="text-sm opacity-70">Hoặc kéo thả file vào khung này</span>
+                <span className="text-lg font-black">Click để tải lên file JSON</span>
+                <span className="text-sm font-bold text-muted-foreground">Hoặc kéo thả file vào khung này</span>
               </div>
               <input 
                 type="file" 
@@ -130,7 +133,7 @@ const ImportVocabulary = () => {
             </label>
 
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex items-start gap-3">
+              <div className="flex items-start gap-3 rounded-xl border-2 border-[#ffc9c9] bg-[#fff2f2] p-4 font-bold text-danger">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <p>{error}</p>
               </div>
@@ -138,8 +141,8 @@ const ImportVocabulary = () => {
 
             {!wordsPreview.length && !error && (
               <div className="space-y-2 pt-2">
-                <p className="text-sm text-muted-foreground font-medium">Cấu trúc file mẫu:</p>
-                <div className="bg-[#1c1417] text-slate-300 p-5 rounded-2xl text-sm font-mono overflow-x-auto border border-white/5">
+                <p className="text-sm font-bold text-muted-foreground">Cấu trúc file mẫu:</p>
+                <div className="rounded-xl border-2 border-night-ink bg-night-ink p-5 font-mono text-sm text-white overflow-x-auto">
                   <pre>{templateJson}</pre>
                 </div>
               </div>
@@ -148,24 +151,24 @@ const ImportVocabulary = () => {
             {wordsPreview.length > 0 && (
               <div className="space-y-3 pt-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-lg text-emerald-400 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <h3 className="flex items-center gap-2 text-lg font-black text-primary">
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>
                     Đã tải {wordsPreview.length} từ vựng
                   </h3>
                 </div>
-                <div className="bg-secondary/30 rounded-2xl overflow-hidden border border-border max-h-[300px] overflow-y-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-secondary/50 sticky top-0 backdrop-blur-md">
+                <div className="max-h-[300px] overflow-y-auto rounded-xl border-2 border-border bg-card">
+                  <table className="se-table text-sm">
+                    <thead className="sticky top-0">
                       <tr>
-                        <th className="p-4 font-semibold text-muted-foreground">Từ vựng</th>
-                        <th className="p-4 font-semibold text-muted-foreground">Nghĩa</th>
+                        <th>Từ vựng</th>
+                        <th>Nghĩa</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border">
+                    <tbody>
                       {wordsPreview.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-secondary/50 transition-colors">
-                          <td className="p-4 font-bold text-foreground text-base">{item.word}</td>
-                          <td className="p-4 text-muted-foreground">{item.meaning}</td>
+                        <tr key={idx} className="hover:bg-muted/60">
+                          <td className="font-black text-foreground">{item.word}</td>
+                          <td className="font-bold text-muted-foreground">{item.meaning}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -175,19 +178,20 @@ const ImportVocabulary = () => {
             )}
           </div>
 
-          <button 
+          <Button
             type="submit"
             disabled={loading || wordsPreview.length === 0}
-            className="w-full py-4 mt-4 bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-500 hover:to-rose-400 text-white font-bold text-lg rounded-2xl transition-all shadow-lg shadow-pink-500/20 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            size="lg"
+            className="mt-4 w-full"
           >
             {loading ? 'Đang xử lý...' : (
               <>
                 <Save className="w-6 h-6" /> Xác nhận Import
               </>
             )}
-          </button>
+          </Button>
         </form>
-      </div>
+      </Panel>
     </div>
   );
 };

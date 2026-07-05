@@ -1,106 +1,77 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, Headphones, Mic, CheckSquare, BarChart, Settings, Users } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { BarChart, BookOpen, CheckSquare, Headphones, Home, Mic, Settings, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '../lib/utils';
+
+const menuItems = [
+  { icon: Home, path: '/dashboard', label: 'Home' },
+  { icon: BookOpen, path: '/dashboard/vocabulary', label: 'Vocab' },
+  { icon: Headphones, path: '/dashboard/listening', label: 'Listen' },
+  { icon: Mic, path: '/dashboard/speaking', label: 'Speak' },
+  { icon: CheckSquare, path: '/dashboard/exams', label: 'Exams' },
+  { icon: BarChart, path: '/dashboard/statistics', label: 'Stats' },
+  { icon: Users, path: '/dashboard/community', label: 'Community' },
+  { icon: Settings, path: '/dashboard/settings', label: 'Settings' },
+];
+
+const isActivePath = (pathname, path) => (
+  path === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(path)
+);
+
+const NavItem = ({ item, active, mobile = false }) => {
+  const Icon = item.icon;
+
+  return (
+    <Link
+      to={item.path}
+      title={item.label}
+      aria-label={item.label}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'relative flex items-center justify-center rounded-xl border-2 font-black transition-colors',
+        mobile ? 'h-14 w-14 flex-col gap-1 text-[10px]' : 'h-16 w-full flex-col gap-1 text-[10px]',
+        active ? 'border-primary text-white' : 'border-transparent text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground',
+      )}
+    >
+      {active && (
+        <motion.span
+          layoutId={mobile ? 'mobile-nav-active' : 'sidebar-active'}
+          className="absolute inset-0 rounded-xl bg-primary"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        />
+      )}
+      <Icon className="relative z-10 h-5 w-5" aria-hidden="true" />
+      <span className="relative z-10">{item.label}</span>
+    </Link>
+  );
+};
 
 const Sidebar = () => {
   const location = useLocation();
-  
-  const menuItems = [
-    { icon: LayoutDashboard, path: '/dashboard', label: 'Home' },
-    { icon: BookOpen, path: '/dashboard/vocabulary', label: 'Vocab' },
-    { icon: Headphones, path: '/dashboard/listening', label: 'Listen' },
-    { icon: Mic, path: '/dashboard/speaking', label: 'Speak' },
-    { icon: CheckSquare, path: '/dashboard/exams', label: 'Exams' },
-    { icon: BarChart, path: '/dashboard/statistics', label: 'Stats' },
-    { icon: Users, path: '/dashboard/community', label: 'Community' },
-    { icon: Settings, path: '/dashboard/settings', label: 'Settings' },
-  ];
-
   const mobileItems = menuItems.slice(0, 5);
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-[100px] bg-white h-full relative z-20 flex-col items-center py-8 rounded-r-[2rem] soft-shadow shrink-0">
-        
-        {/* Logo */}
-        <div className="mb-12 relative group cursor-pointer flex flex-col items-center">
-          <div className="w-12 h-12 bg-gradient-to-tr from-primary to-purple-500 rounded-2xl flex items-center justify-center text-white shadow-primary/30 shadow-lg mb-1">
-            <BookOpen className="w-6 h-6" />
-          </div>
-          <span className="text-[10px] font-bold text-foreground">SelfEnglish</span>
-        </div>
-        
-        {/* Navigation */}
-        <nav aria-label="Điều hướng chính" className="flex flex-col gap-4 w-full px-4 overflow-y-auto no-scrollbar pb-4">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                title={item.label}
-                aria-label={item.label}
-                aria-current={isActive ? 'page' : undefined}
-                className="relative flex items-center justify-center w-full aspect-square rounded-2xl group transition-all shrink-0"
-              >
-                {isActive && (
-                  <motion.div 
-                    layoutId="sidebar-active"
-                    className="absolute inset-0 bg-primary rounded-2xl soft-shadow-primary"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-                <item.icon 
-                  className={cn(
-                    "w-6 h-6 relative z-10 transition-colors duration-300", 
-                    isActive ? "text-white" : "text-muted-foreground group-hover:text-primary"
-                  )} 
-                />
-              </Link>
-            );
-          })}
+      <aside className="hidden h-full w-[112px] shrink-0 flex-col items-center border-r-2 border-border bg-background px-4 py-6 md:flex">
+        <Link to="/dashboard" className="mb-10 flex flex-col items-center gap-2 text-center">
+          <span className="se-icon-sticker h-14 w-14 border-primary bg-storybook-green text-primary">
+            <BookOpen className="h-7 w-7" aria-hidden="true" />
+          </span>
+          <span className="text-[11px] font-black leading-tight text-foreground">SelfEnglish</span>
+        </Link>
+
+        <nav aria-label="Điều hướng chính" className="flex w-full flex-1 flex-col gap-3 overflow-y-auto pb-4">
+          {menuItems.map((item) => (
+            <NavItem key={item.path} item={item} active={isActivePath(location.pathname, item.path)} />
+          ))}
         </nav>
-        
       </aside>
 
-      {/* Mobile Bottom Navigation */}
-      <nav aria-label="Điều hướng di động" className="md:hidden fixed bottom-0 left-0 right-0 bg-white z-50 flex items-center justify-around px-2 py-3 rounded-t-3xl soft-shadow border-t border-border/50">
-        {mobileItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path === '/dashboard' && location.pathname === '/');
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              aria-label={item.label}
-              aria-current={isActive ? 'page' : undefined}
-              className="relative flex flex-col items-center justify-center w-14 h-14 rounded-2xl transition-all"
-            >
-              {isActive && (
-                <motion.div 
-                  layoutId="mobile-nav-active"
-                  className="absolute inset-0 bg-primary/10 rounded-2xl"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-              <item.icon 
-                className={cn(
-                  "w-6 h-6 relative z-10 mb-0.5 transition-colors duration-300", 
-                  isActive ? "text-primary" : "text-muted-foreground"
-                )} 
-              />
-              <span className={cn(
-                "text-[10px] font-semibold relative z-10 transition-colors duration-300",
-                isActive ? "text-primary" : "text-muted-foreground"
-              )}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+      <nav aria-label="Điều hướng di động" className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t-2 border-border bg-background px-2 py-3 md:hidden">
+        {mobileItems.map((item) => (
+          <NavItem key={item.path} item={item} active={isActivePath(location.pathname, item.path)} mobile />
+        ))}
       </nav>
     </>
   );

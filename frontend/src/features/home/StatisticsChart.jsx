@@ -13,18 +13,18 @@ const data = [
 const StatisticsChart = () => {
   return (
     <div className="h-full w-full flex flex-col">
-      <h3 className="text-lg font-semibold mb-4 text-foreground">Thống kê học tập tuần này</h3>
+      <h3 className="se-label mb-4 text-foreground">Thống kê học tập tuần này</h3>
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#ccc" opacity={0.2} />
             <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }}
+            <Tooltip
+              contentStyle={{ backgroundColor: 'var(--color-card)', border: '2px solid var(--color-border)', borderRadius: 12, color: 'var(--color-foreground)' }}
             />
-            <Line type="monotone" dataKey="words" stroke="hsl(var(--primary))" strokeWidth={3} name="Từ vựng" dot={{ r: 4 }} activeDot={{ r: 6 }} />
-            <Line type="monotone" dataKey="time" stroke="#10b981" strokeWidth={3} name="Thời gian (phút)" dot={{ r: 4 }} />
+            <Line type="monotone" dataKey="words" stroke="var(--color-primary)" strokeWidth={3} name="Từ vựng" dot={{ r: 4 }} activeDot={{ r: 6 }} />
+            <Line type="monotone" dataKey="time" stroke="var(--color-accent)" strokeWidth={3} name="Thời gian (phút)" dot={{ r: 4 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

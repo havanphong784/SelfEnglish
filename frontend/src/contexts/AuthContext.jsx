@@ -1,10 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth } from '../config/firebase';
 import { browserLocalPersistence, onAuthStateChanged, setPersistence } from 'firebase/auth';
-
-const AuthContext = createContext({});
-
-export const useAuth = () => useContext(AuthContext);
+import { AuthContext } from './authState';
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -35,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-storybook-green border-t-primary"></div>
       </div>
     );
   }

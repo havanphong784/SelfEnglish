@@ -65,7 +65,7 @@ const StudyController = () => {
   }
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+    <div className="se-shell grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
       <section className="min-w-0">
         <StudyHeader
           currentIndex={currentIndex}
