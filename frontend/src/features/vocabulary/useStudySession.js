@@ -92,12 +92,6 @@ const summarizeOutcomes = (outcomes) => {
 };
 
 const getOutcomeFromResult = (result) => {
-  const rating = typeof result === 'object' ? result.rating : null;
-
-  if (rating === 'again') return { type: 'needsReview', rating };
-  if (rating === 'hard') return { type: 'needsReview', rating };
-  if (rating === 'good' || rating === 'easy') return { type: 'remembered', rating };
-
   return result
     ? { type: 'remembered', rating: 'correct' }
     : { type: 'needsReview', rating: 'incorrect' };
@@ -276,7 +270,6 @@ export const useStudySession = ({ packageId, mode }) => {
     if (submittingRef.current) return;
 
     const outcome = getOutcomeFromResult(result);
-    const rating = typeof result === 'object' ? result.rating : null;
     const isCorrect = outcome.type === 'remembered';
 
     submittingRef.current = true;
@@ -288,7 +281,7 @@ export const useStudySession = ({ packageId, mode }) => {
       if (mode !== 'practice') {
         await fetchWithAuth(`/vocabularies/${currentWord.id}/review`, {
           method: 'POST',
-          body: JSON.stringify(rating ? { rating } : { isCorrect }),
+          body: JSON.stringify({ isCorrect }),
         });
       }
 

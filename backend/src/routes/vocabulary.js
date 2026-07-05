@@ -24,6 +24,7 @@ router.get(
   vocabularyController.practicePackage,
 );
 
+router.get('/review/count', vocabularyController.getReviewCount);
 router.get('/review', vocabularyController.getVocabulariesForReview);
 router.post(
   '/:id/review',

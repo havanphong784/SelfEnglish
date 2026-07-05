@@ -93,6 +93,25 @@ exports.getVocabulariesForReview = async (req, res, next) => {
   }
 };
 
+exports.getReviewCount = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const now = new Date();
+
+    const count = await prisma.userVocabulary.count({
+      where: {
+        userId,
+        nextReview: { lte: now },
+        vocabulary: { is: vocabularyAccessWhere(userId) },
+      },
+    });
+
+    res.json({ count });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.learnPackage = async (req, res, next) => {
   try {
     const { packageId } = req.params;

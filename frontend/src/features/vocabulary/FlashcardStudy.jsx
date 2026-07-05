@@ -1,37 +1,37 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, ChevronLeft, ChevronRight, Crown, Gauge, Lightbulb, Repeat, Volume2, X, Zap } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Crown, Lightbulb, Repeat, Volume2, X } from 'lucide-react';
 
 const ratings = [
   {
-    value: 'again',
+    value: false,
     label: 'Quên',
-    effect: 'Lùi cấp',
+    effect: 'Cần ôn lại',
+    shortcuts: ['1', '←'],
     icon: X,
     classes: 'border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100',
   },
   {
-    value: 'hard',
-    label: 'Khó',
-    effect: 'Giữ nhịp',
-    icon: Gauge,
-    classes: 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300 hover:bg-amber-100',
-  },
-  {
-    value: 'good',
+    value: true,
     label: 'Nhớ',
     effect: 'Tăng cấp',
+    shortcuts: ['2', '→'],
     icon: Check,
     classes: 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100',
   },
-  {
-    value: 'easy',
-    label: 'Dễ',
-    effect: 'Tăng nhanh',
-    icon: Zap,
-    classes: 'border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-300 hover:bg-sky-100',
-  },
 ];
+
+const ShortcutKey = ({ children, dark = false }) => (
+  <kbd
+    className={`inline-flex h-6 min-w-6 items-center justify-center rounded-md border px-1.5 font-mono text-[11px] font-black leading-none shadow-sm ${
+      dark
+        ? 'border-white/20 bg-white/15 text-white'
+        : 'border-border bg-white/80 text-muted-foreground'
+    }`}
+  >
+    {children}
+  </kbd>
+);
 
 const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -81,10 +81,14 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
 
       if (!isFlipped) return;
 
-      if (event.code === 'ArrowLeft' || event.code === 'Digit1') handleAction({ rating: 'again' });
-      if (event.code === 'Digit2') handleAction({ rating: 'hard' });
-      if (event.code === 'ArrowRight' || event.code === 'Digit3') handleAction({ rating: 'good' });
-      if (event.code === 'Digit4') handleAction({ rating: 'easy' });
+      if (event.code === 'ArrowLeft' || event.code === 'Digit1') {
+        event.preventDefault();
+        handleAction(false);
+      }
+      if (event.code === 'ArrowRight' || event.code === 'Digit2') {
+        event.preventDefault();
+        handleAction(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -240,6 +244,7 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
             >
               <Repeat className="h-4 w-4" />
               Lật thẻ
+              <ShortcutKey>Space</ShortcutKey>
             </motion.button>
           ) : (
             <motion.div
@@ -248,15 +253,15 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
               animate={{ opacity: 1, y: 0 }}
               className="flex w-full flex-col items-center gap-6"
             >
-              <div className="grid w-full max-w-4xl grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+              <div className="grid w-full max-w-2xl grid-cols-2 gap-3 md:gap-4">
                 {ratings.map((rating) => {
                   const Icon = rating.icon;
                   return (
                     <button
-                      key={rating.value}
+                      key={String(rating.value)}
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleAction({ rating: rating.value });
+                        handleAction(rating.value);
                       }}
                       disabled={disabled}
                       className={`group flex min-h-[96px] items-center gap-3 rounded-2xl border-2 p-3 font-bold shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 ${rating.classes}`}
@@ -268,6 +273,11 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
                       <div className="flex min-w-0 flex-col items-start">
                         <span className="text-base md:text-lg">{rating.label}</span>
                         <span className="text-xs font-medium opacity-70">{rating.effect}</span>
+                      </div>
+                      <div className="ml-auto flex shrink-0 items-center gap-1">
+                        {rating.shortcuts.map((shortcut) => (
+                          <ShortcutKey key={shortcut}>{shortcut}</ShortcutKey>
+                        ))}
                       </div>
                     </button>
                   );

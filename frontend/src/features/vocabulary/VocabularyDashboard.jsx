@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Clock, Crown, Flame, Sparkles, Target } from 'lucide-react';
 import { fetchWithAuth } from '../../utils/api';
@@ -11,27 +11,43 @@ const VocabularyDashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async ({ showLoading = true } = {}) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const pkgs = await fetchWithAuth('/vocabularies/packages');
       setPackages(pkgs);
 
-      const reviews = await fetchWithAuth('/vocabularies/review');
-      setReviewCount(reviews.length);
+      const reviewSummary = await fetchWithAuth('/vocabularies/review/count');
+      setReviewCount(Number(reviewSummary?.count) || 0);
 
       const userStats = await fetchWithAuth('/vocabularies/stats');
       setStats(userStats);
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void loadData({ showLoading: false });
+      }
+    };
+
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    window.addEventListener('focus', refreshWhenVisible);
+
+    return () => {
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+      window.removeEventListener('focus', refreshWhenVisible);
+    };
+  }, [loadData]);
 
   const startReview = () => {
     if (reviewCount === 0) {
