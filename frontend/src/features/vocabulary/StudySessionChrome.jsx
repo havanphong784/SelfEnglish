@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowLeft, BookOpen, RotateCcw, Target, Trophy } from 'lucide-react';
-import { Button, IconSticker, Panel, ProgressBar } from '../../components/ui/Primitives';
+import { Button, IconSticker, Kbd, Panel, ProgressBar } from '../../components/ui/Primitives';
 
 export const StudyLoading = () => (
   <div className="py-12 text-center font-bold text-muted-foreground">Đang chuẩn bị phiên học...</div>
@@ -200,4 +200,24 @@ export const InlineError = ({ error }) => (
     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
     <span>{error}</span>
   </div>
+);
+
+export const ShortcutsPanel = () => (
+  <Panel className="p-4">
+    <div className="se-label mb-3 text-[12px]">Phím tắt</div>
+    <div className="space-y-2.5 text-sm font-semibold text-muted-foreground">
+      <div className="flex items-center justify-between">
+        <span>Lật thẻ</span>
+        <Kbd>Space</Kbd>
+      </div>
+      <div className="flex items-center justify-between">
+        <span>Nhớ / Bỏ qua</span>
+        <Kbd>2 / →</Kbd>
+      </div>
+      <div className="flex items-center justify-between">
+        <span>Quên / Lùi</span>
+        <Kbd>1 / ←</Kbd>
+      </div>
+    </div>
+  </Panel>
 );

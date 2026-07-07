@@ -86,7 +86,7 @@ const ImportVocabulary = () => {
 ]`;
 
   return (
-    <div className="se-shell max-w-3xl space-y-8 pb-12">
+    <div className="se-shell pt-4  max-w-3xl space-y-8 pb-12">
       <div className="flex items-center gap-4">
         <Button
           onClick={() => navigate('/dashboard/vocabulary')}

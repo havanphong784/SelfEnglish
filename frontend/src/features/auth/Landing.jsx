@@ -11,7 +11,7 @@ import { Badge, Button, IconSticker, Panel } from '../../components/ui/Primitive
 
 const features = [
   { icon: Layers3, title: 'Học từ bằng flashcard', text: 'Lật thẻ, nghe phát âm và ghi nhớ nghĩa nhanh hơn mỗi ngày.' },
-  { icon: LineChart, title: 'Theo dõi tiến độ', text: 'Xem số từ đã học, chuỗi học và mục tiêu tuần trong một nơi.' },
+  { icon: LineChart, title: 'Theo dõi tiến độ', text: 'Xem số từ mới, chuỗi học và mục tiêu tuần trong một nơi.' },
   { icon: GraduationCap, title: 'Ôn tập thông minh', text: 'Hệ thống nhắc lại đúng lúc để bạn nhớ lâu hơn mà không bị quá tải.' },
 ];
 
@@ -80,7 +80,7 @@ export default function Landing() {
 
   return (
     <main className="min-h-screen bg-background font-sans">
-      <header className="se-shell flex items-center justify-between px-4 py-5">
+      <header className="se-shell pt-4  flex items-center justify-between px-4 py-5">
         <div className="flex items-center gap-3">
           <IconSticker icon={BookOpenCheck} className="border-primary bg-storybook-green" />
           <span className="text-lg font-black text-foreground">SelfEnglish</span>

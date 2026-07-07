@@ -18,7 +18,7 @@ const PageFallback = () => (
 );
 
 const ComingSoon = ({ title }) => (
-  <div className="se-shell py-4">
+  <div className="se-shell pt-4  py-4">
     <Panel className="text-center">
       <div className="se-eyebrow mb-4">Đang hoàn thiện</div>
       <h1 className="se-page-title">{title}</h1>

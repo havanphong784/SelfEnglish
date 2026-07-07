@@ -1,4 +1,8 @@
 const prisma = require('../config/db');
+const {
+  buildRecentStudyDays,
+  getRecentStudyQueryStart,
+} = require('../services/dashboard.service');
 
 exports.getDashboardStats = async (req, res, next) => {
   try {
@@ -8,14 +12,16 @@ exports.getDashboardStats = async (req, res, next) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const totalWords = await prisma.userVocabulary.count({
+    const startedWords = await prisma.userVocabulary.count({
       where: { userId: user.id },
     });
 
     const recentSessions = await prisma.studySession.findMany({
-      where: { userId: user.id },
-      orderBy: { date: 'desc' },
-      take: 7,
+      where: {
+        userId: user.id,
+        date: { gte: getRecentStudyQueryStart() },
+      },
+      orderBy: { date: 'asc' },
     });
 
     res.json({
@@ -25,8 +31,9 @@ exports.getDashboardStats = async (req, res, next) => {
         targetWeekly: user.targetWeekly,
       },
       stats: {
-        totalWords,
-        recentSessions: recentSessions.reverse(),
+        startedWords,
+        totalWords: startedWords,
+        recentSessions: buildRecentStudyDays(recentSessions),
       },
     });
   } catch (error) {

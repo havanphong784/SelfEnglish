@@ -7,8 +7,6 @@ const {
 } = require('../repositories/package.repository');
 const {
   getNextLevel,
-  getNextLevelForRating,
-  isCorrectRating,
   getNextReviewDate,
 } = require('../services/review.service');
 const {
@@ -26,6 +24,8 @@ const formatVocabulary = (vocabulary, level = 1) => ({
   synonyms: vocabulary.synonyms,
   level,
 });
+
+const STUDY_SESSION_WORD_LIMIT = 10;
 
 exports.getPackages = async (req, res, next) => {
   try {
@@ -49,11 +49,11 @@ exports.getPackages = async (req, res, next) => {
       },
     });
 
-    const learnedCountByPackage = {};
+    const startedCountByPackage = {};
     userVocabs.forEach((userVocab) => {
       const packageId = userVocab.vocabulary.packageId;
       if (!packageId) return;
-      learnedCountByPackage[packageId] = (learnedCountByPackage[packageId] || 0) + 1;
+      startedCountByPackage[packageId] = (startedCountByPackage[packageId] || 0) + 1;
     });
 
     res.json(packages.map((pkg) => ({
@@ -65,7 +65,8 @@ exports.getPackages = async (req, res, next) => {
       visibility: pkg.visibility,
       isOwner: pkg.ownerId === userId,
       totalWords: pkg._count.vocabularies,
-      learnedWords: learnedCountByPackage[pkg.id] || 0,
+      startedWords: startedCountByPackage[pkg.id] || 0,
+      learnedWords: startedCountByPackage[pkg.id] || 0,
     })));
   } catch (error) {
     next(error);
@@ -84,7 +85,7 @@ exports.getVocabulariesForReview = async (req, res, next) => {
         vocabulary: { is: vocabularyAccessWhere(userId) },
       },
       include: { vocabulary: true },
-      take: 20,
+      take: STUDY_SESSION_WORD_LIMIT,
     });
 
     res.json(reviews.map((userVocab) => formatVocabulary(userVocab.vocabulary, userVocab.level)));
@@ -129,7 +130,7 @@ exports.learnPackage = async (req, res, next) => {
           none: { userId },
         },
       },
-      take: 10,
+      take: STUDY_SESSION_WORD_LIMIT,
     });
 
     res.json(unlearned.map((vocabulary) => formatVocabulary(vocabulary, 1)));
@@ -141,7 +142,7 @@ exports.learnPackage = async (req, res, next) => {
 exports.updateProgress = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { isCorrect, rating } = req.body;
+    const { isCorrect } = req.body;
     const userId = req.user.id;
 
     const vocabulary = await findAccessibleVocabulary(id, userId);
@@ -156,10 +157,7 @@ exports.updateProgress = async (req, res, next) => {
     });
 
     const previousLevel = userVocab ? userVocab.level : 0;
-    const resolvedIsCorrect = rating ? isCorrectRating(rating) : isCorrect;
-    const newLevel = rating
-      ? getNextLevelForRating(userVocab?.level, rating)
-      : getNextLevel(userVocab?.level, isCorrect);
+    const newLevel = getNextLevel(userVocab?.level, isCorrect);
     const nextReview = getNextReviewDate(newLevel);
 
     const [progress] = await prisma.$transaction([
@@ -182,7 +180,7 @@ exports.updateProgress = async (req, res, next) => {
         data: {
           userId,
           vocabularyId: id,
-          isCorrect: resolvedIsCorrect,
+          isCorrect,
           previousLevel,
           newLevel,
         },
@@ -190,7 +188,7 @@ exports.updateProgress = async (req, res, next) => {
     ]);
 
     res.json({
-      message: resolvedIsCorrect ? 'Lam tot lam!' : 'Co gang lan sau!',
+      message: isCorrect ? 'Lam tot lam!' : 'Co gang lan sau!',
       progress,
     });
   } catch (error) {
@@ -443,12 +441,13 @@ exports.getStats = async (req, res, next) => {
       },
     });
 
-    const todayLearned = todaySessions.reduce((sum, session) => sum + session.wordsLearned, 0);
+    const todayNewWords = todaySessions.reduce((sum, session) => sum + session.wordsLearned, 0);
 
     res.json({
       streak: user.streak,
       targetWeekly: user.targetWeekly,
-      todayLearned,
+      todayNewWords,
+      todayLearned: todayNewWords,
       levelDistribution,
     });
   } catch (error) {
@@ -497,6 +496,7 @@ exports.getPackageDetails = async (req, res, next) => {
       visibility: pkg.visibility,
       isOwner: pkg.ownerId === userId,
       totalWords: words.length,
+      startedWords: words.length - levelDistribution[0],
       learnedWords: words.length - levelDistribution[0],
       levelDistribution,
       words,
@@ -528,6 +528,7 @@ exports.practicePackage = async (req, res, next) => {
           where: { userId },
         },
       },
+      take: STUDY_SESSION_WORD_LIMIT,
     });
 
     res.json(learned.map((vocabulary) => (

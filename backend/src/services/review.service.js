@@ -28,25 +28,6 @@ const getNextLevel = (currentLevel, isCorrect) => {
   return 3;
 };
 
-const getNextLevelForRating = (currentLevel, rating) => {
-  const level = currentLevel || 0;
-
-  switch (rating) {
-    case 'again':
-      return level >= 5 ? 3 : Math.max(level - 1, 1);
-    case 'hard':
-      return Math.max(level, 1);
-    case 'good':
-      return getNextLevel(level, true);
-    case 'easy':
-      return Math.min(level + 2, MAX_LEVEL);
-    default:
-      return getNextLevel(level, Boolean(rating));
-  }
-};
-
-const isCorrectRating = (rating) => rating !== 'again';
-
 const getNextReviewDate = (level, fromDate = new Date()) => {
   const nextReview = new Date(fromDate);
   nextReview.setDate(nextReview.getDate() + calculateInterval(level));
@@ -56,7 +37,5 @@ const getNextReviewDate = (level, fromDate = new Date()) => {
 module.exports = {
   calculateInterval,
   getNextLevel,
-  getNextLevelForRating,
-  isCorrectRating,
   getNextReviewDate,
 };

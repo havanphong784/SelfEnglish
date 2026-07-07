@@ -57,13 +57,14 @@ const PackageDetails = () => {
         const oldLevel = prev.words.find(w => w.id === wordId).level;
         newDist[oldLevel]--;
         newDist[6]++;
-        const newLearned = prev.totalWords - newDist[0];
+        const newStarted = prev.totalWords - newDist[0];
         
         return {
           ...prev,
           words: newWords,
           levelDistribution: newDist,
-          learnedWords: newLearned
+          startedWords: newStarted,
+          learnedWords: newStarted
         };
       });
     } catch (error) {
@@ -75,6 +76,8 @@ const PackageDetails = () => {
 
   if (loading) return <div className="p-8 text-center font-bold text-muted-foreground">Đang mở gói từ...</div>;
   if (!details) return <div className="p-8 text-center font-bold text-danger">Không tìm thấy dữ liệu</div>;
+
+  const startedWords = details.startedWords ?? details.learnedWords ?? 0;
 
   const renderProgressBar = () => {
     const total = details.totalWords;
@@ -100,7 +103,7 @@ const PackageDetails = () => {
   };
 
   return (
-    <div className="se-shell space-y-8 pb-12">
+    <div className="se-shell pt-4  space-y-8 pb-12">
       <Button
         onClick={() => navigate('/dashboard/vocabulary')}
         variant="ghost"
@@ -122,8 +125,8 @@ const PackageDetails = () => {
             
             <div className="pt-4 space-y-2">
               <div className="flex justify-between text-sm font-black uppercase tracking-[0.08em]">
-                <span className="text-muted-foreground">Đã học: <span className="text-foreground">{details.learnedWords}</span> / {details.totalWords} từ</span>
-                <span className="text-primary">{Math.round((details.learnedWords / details.totalWords) * 100) || 0}%</span>
+                <span className="text-muted-foreground">Đã bắt đầu: <span className="text-foreground">{startedWords}</span> / {details.totalWords} từ</span>
+                <span className="text-primary">{Math.round((startedWords / details.totalWords) * 100) || 0}%</span>
               </div>
               {renderProgressBar()}
               <div className="flex gap-4 pt-2 text-xs font-bold text-muted-foreground">
@@ -144,13 +147,13 @@ const PackageDetails = () => {
             </Button>
             <Button
               onClick={() => navigate(`/dashboard/vocabulary/study?packageId=${details.id}&mode=practice`)}
-              disabled={details.learnedWords === 0}
+              disabled={startedWords === 0}
               variant="secondary"
               size="lg"
               className="w-full"
             >
               <RotateCcw className="w-5 h-5" />
-              Ôn lại ({details.learnedWords} từ)
+              Ôn lại ({startedWords} từ)
             </Button>
           </div>
         </div>

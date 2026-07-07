@@ -4,7 +4,8 @@ describe('vocabulary.validator', () => {
   it('rejects review payloads without boolean isCorrect', () => {
     expect(() => reviewBody.parse({ isCorrect: 'true' })).toThrow();
     expect(reviewBody.parse({ isCorrect: true })).toEqual({ isCorrect: true });
-    expect(reviewBody.parse({ rating: 'easy' })).toEqual({ rating: 'easy' });
+    expect(() => reviewBody.parse({ rating: 'easy' })).toThrow();
+    expect(() => reviewBody.parse({ isCorrect: true, rating: 'easy' })).toThrow();
     expect(() => reviewBody.parse({})).toThrow();
   });
 

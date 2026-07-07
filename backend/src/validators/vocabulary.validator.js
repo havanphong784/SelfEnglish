@@ -9,11 +9,8 @@ const packageParam = z.object({
 });
 
 const reviewBody = z.object({
-  isCorrect: z.boolean().optional(),
-  rating: z.enum(['again', 'hard', 'good', 'easy']).optional(),
-}).refine((value) => value.isCorrect !== undefined || value.rating !== undefined, {
-  message: 'isCorrect or rating is required',
-});
+  isCorrect: z.boolean(),
+}).strict();
 
 const importedWord = z.object({
   word: z.string().trim().min(1),

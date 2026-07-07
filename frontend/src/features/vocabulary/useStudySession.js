@@ -101,6 +101,8 @@ const getRetryWords = (words, outcomes) => (
   words.filter((word) => outcomes[word.id]?.type === 'needsReview')
 );
 
+const isNewWordSession = (mode, packageId) => Boolean(packageId && mode !== 'practice' && mode !== 'review');
+
 const getModeLabel = (mode, packageId) => {
   if (mode === 'practice') return 'Ôn lại';
   if (mode === 'review' || !packageId) return 'Đến hạn';
@@ -113,6 +115,7 @@ export const useStudySession = ({ packageId, mode }) => {
   const outcomesRef = useRef(null);
   const sessionStartRef = useRef(null);
   const submittingRef = useRef(false);
+  const countsNewWordsRef = useRef(false);
 
   if (outcomesRef.current === null) outcomesRef.current = {};
   if (sessionStartRef.current === null) sessionStartRef.current = Date.now();
@@ -135,6 +138,7 @@ export const useStudySession = ({ packageId, mode }) => {
   const loadStudySession = useCallback(async () => {
     dispatch({ type: 'load:start' });
     resetSessionRefs();
+    countsNewWordsRef.current = isNewWordSession(mode, packageId);
 
     try {
       let data = [];
@@ -179,6 +183,7 @@ export const useStudySession = ({ packageId, mode }) => {
 
             outcomesRef.current = savedOutcomes;
             sessionStartRef.current = savedSession.startedAt || Date.now();
+            countsNewWordsRef.current = savedSession.countsNewWords ?? isNewWordSession(mode, packageId);
             dispatch({
               type: 'session:resume',
               words: savedSession.words,
@@ -208,6 +213,7 @@ export const useStudySession = ({ packageId, mode }) => {
         words,
         outcomes,
         startedAt: sessionStartRef.current,
+        countsNewWords: countsNewWordsRef.current,
       }));
     } else if (isFinished) {
       sessionStorage.removeItem(STUDY_SESSION_STORAGE_KEY);
@@ -237,11 +243,12 @@ export const useStudySession = ({ packageId, mode }) => {
     if (completedCount === 0) return;
 
     const durationMinutes = Math.max(1, Math.floor((Date.now() - sessionStartRef.current) / 60000));
+    const wordsLearned = countsNewWordsRef.current ? completedCount : 0;
 
     try {
       await fetchWithAuth('/vocabularies/session', {
         method: 'POST',
-        body: JSON.stringify({ durationMinutes, wordsLearned: completedCount }),
+        body: JSON.stringify({ durationMinutes, wordsLearned }),
       });
     } catch (saveError) {
       console.error('Lỗi lưu phiên học:', saveError);
@@ -343,6 +350,7 @@ export const useStudySession = ({ packageId, mode }) => {
     const nextWords = getRetryWords(words, outcomesRef.current);
     if (nextWords.length === 0) return;
     resetSessionRefs();
+    countsNewWordsRef.current = false;
     dispatch({ type: 'session:retry-missed', words: nextWords });
   }, [resetSessionRefs, words]);
 

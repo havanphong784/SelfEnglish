@@ -26,24 +26,40 @@ const levelLabels = {
 const emptyLevelDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
 
 const formatSessionLabel = (dateValue) => {
+  if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+    const [, month, day] = dateValue.split('-');
+    return `${Number(day)}/${Number(month)}`;
+  }
+
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return '--/--';
   return `${date.getDate()}/${date.getMonth() + 1}`;
 };
 
-const buildRecentSessions = (sessions = []) => {
-  if (!Array.isArray(sessions) || sessions.length === 0) {
-    return Array.from({ length: 7 }, (_, index) => ({
-      label: `Ngày ${index + 1}`,
-      words: 0,
-      minutes: 0,
-    }));
-  }
+const buildEmptyRecentDays = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + index - 6);
+
+    return {
+      label: formatSessionLabel(date),
+      newWords: 0,
+      minutes: 0,
+      sessions: 0,
+    };
+  });
+};
+
+const buildRecentSessions = (sessions = []) => {
+  if (!Array.isArray(sessions) || sessions.length === 0) return buildEmptyRecentDays();
   return sessions.map((session) => ({
     label: formatSessionLabel(session.date),
-    words: Number(session.wordsLearned) || 0,
+    newWords: Number(session.newWordsLearned ?? session.wordsLearned) || 0,
     minutes: Number(session.durationMinutes) || 0,
+    sessions: Number(session.sessions) || 0,
   }));
 };
 
@@ -85,8 +101,8 @@ const Dashboard = () => {
     userName: '',
     streak: 0,
     targetWeekly: 80,
-    todayLearned: 0,
-    totalWords: 0,
+    todayNewWords: 0,
+    startedWords: 0,
     levelDistribution: emptyLevelDistribution,
     recentSessions: [],
   });
@@ -107,20 +123,20 @@ const Dashboard = () => {
           ...emptyLevelDistribution,
           ...(vocabStats?.levelDistribution || {}),
         };
-        const learnedWords = Object.values(levelDistribution).reduce((sum, value) => sum + (Number(value) || 0), 0);
+        const startedWordsFallback = Object.values(levelDistribution).reduce((sum, value) => sum + (Number(value) || 0), 0);
 
         setDashboardData({
           userName: dashStats?.user?.name || '',
           streak: vocabStats?.streak || dashStats?.user?.streak || 0,
           targetWeekly: vocabStats?.targetWeekly || dashStats?.user?.targetWeekly || 80,
-          todayLearned: vocabStats?.todayLearned || 0,
-          totalWords: dashStats?.stats?.totalWords || learnedWords,
+          todayNewWords: vocabStats?.todayNewWords ?? vocabStats?.todayLearned ?? 0,
+          startedWords: dashStats?.stats?.startedWords ?? dashStats?.stats?.totalWords ?? startedWordsFallback,
           levelDistribution,
           recentSessions: dashStats?.stats?.recentSessions || [],
         });
       } catch (loadError) {
         console.error('Failed to load dashboard data:', loadError);
-      setError('Không tải được dữ liệu học tập. Thử lại sau một chút nhé.');
+        setError('Không tải được dữ liệu học tập. Thử lại sau một chút nhé.');
       } finally {
         setLoading(false);
       }
@@ -138,11 +154,11 @@ const Dashboard = () => {
     [dashboardData.levelDistribution],
   );
 
-  const weeklyLearned = recentSessions.reduce((sum, item) => sum + item.words, 0);
+  const weeklyNewWords = recentSessions.reduce((sum, item) => sum + item.newWords, 0);
   const weeklyTarget = Math.max(Number(dashboardData.targetWeekly) || 0, 1);
-  const weeklyPercent = Math.min(100, Math.round((weeklyLearned / weeklyTarget) * 100));
+  const weeklyPercent = Math.min(100, Math.round((weeklyNewWords / weeklyTarget) * 100));
   const masteredWords = Number(dashboardData.levelDistribution[6]) || 0;
-  const activeDays = dashboardData.recentSessions.filter((session) => Number(session.wordsLearned) > 0).length;
+  const activeDays = recentSessions.filter((session) => session.sessions > 0).length;
   const maxLevelValue = Math.max(...levelRows.map((row) => row.value), 1);
 
   if (loading) return <DashboardSkeleton />;
@@ -168,11 +184,11 @@ const Dashboard = () => {
             <div className="mt-5 flex flex-wrap gap-3">
               <div className="rounded-xl border-2 border-primary bg-white px-4 py-3">
                 <div className="se-label text-[12px]">Từ mới hôm nay</div>
-                <div className="mt-1 font-secondary text-3xl font-black tabular-nums text-foreground">{dashboardData.todayLearned}</div>
+                <div className="mt-1 font-secondary text-3xl font-black tabular-nums text-foreground">{dashboardData.todayNewWords}</div>
               </div>
               <div className="rounded-xl border-2 border-primary bg-white px-4 py-3">
-                <div className="se-label text-[12px]">Từ đã học tuần này</div>
-                <div className="mt-1 font-secondary text-3xl font-black tabular-nums text-foreground">{weeklyLearned}</div>
+                <div className="se-label text-[12px]">Từ mới tuần này</div>
+                <div className="mt-1 font-secondary text-3xl font-black tabular-nums text-foreground">{weeklyNewWords}</div>
               </div>
             </div>
           </div>
@@ -187,7 +203,7 @@ const Dashboard = () => {
             </div>
             <ProgressBar value={weeklyPercent} className="mt-4" />
             <div className="mt-3 flex justify-between text-xs font-bold text-muted-foreground">
-              <span>{weeklyLearned} từ</span>
+              <span>{weeklyNewWords} từ mới</span>
               <span>{weeklyTarget} mục tiêu</span>
             </div>
           </div>
@@ -195,10 +211,10 @@ const Dashboard = () => {
       </Panel>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Tổng từ vựng" value={dashboardData.totalWords} detail="Đã lưu trong kho từ" icon={BookOpen} />
+        <StatCard label="Từ đã bắt đầu" value={dashboardData.startedWords} detail="Có tiến độ học" icon={BookOpen} />
         <StatCard label="Chuỗi học" value={dashboardData.streak} detail="Ngày học liên tiếp" icon={Flame} tone="warning" />
         <StatCard label="Thành thạo" value={masteredWords} detail="Từ đã nắm chắc" icon={Trophy} tone="green" />
-        <StatCard label="Ngày có học" value={activeDays} detail="Trong 7 phiên gần nhất" icon={GraduationCap} tone="blue" />
+        <StatCard label="Ngày có học" value={activeDays} detail="Trong 7 ngày gần nhất" icon={GraduationCap} tone="blue" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -210,9 +226,9 @@ const Dashboard = () => {
                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} />
                 <Tooltip cursor={{ fill: 'rgba(88, 204, 2, 0.12)' }} contentStyle={{ border: '2px solid var(--color-border)', borderRadius: 12, color: 'var(--color-foreground)' }} />
-                <Bar dataKey="words" name="Từ đã học" radius={[8, 8, 4, 4]} barSize={22}>
+                <Bar dataKey="newWords" name="Từ mới" radius={[8, 8, 4, 4]} barSize={22}>
                   {recentSessions.map((entry) => (
-                    <Cell key={entry.label} fill={entry.words > 0 ? 'var(--color-primary)' : 'var(--color-border)'} />
+                    <Cell key={entry.label} fill={entry.newWords > 0 ? 'var(--color-primary)' : 'var(--color-border)'} />
                   ))}
                 </Bar>
                 <Line type="monotone" dataKey="minutes" name="Phút học" stroke="var(--color-accent)" strokeWidth={3} dot={false} />

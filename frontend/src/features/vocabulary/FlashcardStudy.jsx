@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronLeft, ChevronRight, Crown, Lightbulb, Repeat, Volume2, X } from 'lucide-react';
-import { Button, Kbd } from '../../components/ui/Primitives';
+import { Badge, Button, Kbd } from '../../components/ui/Primitives';
 
 const ratings = [
   {
@@ -90,12 +90,10 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
 
   if (!word) return null;
 
-  const audioButton = (dark = false) => (
+  const audioButton = () => (
     <button
       onClick={(event) => playAudio(event, word.word)}
-      className={`absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-transform hover:scale-105 active:scale-95 md:right-5 md:top-5 ${
-        dark ? 'border-white bg-white text-night-ink' : 'border-primary bg-storybook-green text-primary'
-      }`}
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 border-primary bg-storybook-green text-primary transition-transform hover:scale-105 active:scale-95"
       title="Nghe phát âm"
       type="button"
     >
@@ -105,81 +103,96 @@ const FlashcardStudy = ({ word, onNext, onMaster, disabled = false }) => {
 
   const englishCard = (back = false) => (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center rounded-xl border-2 border-border bg-card p-5 [backface-visibility:hidden] md:p-8"
+      className="absolute inset-0 flex flex-col rounded-xl border-2 border-border bg-card [backface-visibility:hidden]"
       style={back ? { transform: 'rotateY(180deg)' } : undefined}
     >
-      {audioButton()}
-
-      {word.partOfSpeech && (
-        <span className="mb-4 rounded-xl border-2 border-primary bg-primary px-4 py-1.5 text-xs font-bold tracking-wider text-primary-foreground md:text-sm">
-          {word.partOfSpeech.toUpperCase()}
-        </span>
-      )}
-
-      <h2 className="mb-4 text-center font-secondary text-4xl font-black tracking-tight text-foreground md:text-6xl">
-        {word.word}
-      </h2>
-
-      {word.ipa && (
-        <p className="rounded-xl border-2 border-border bg-muted px-4 py-1.5 font-mono text-base font-bold text-muted-foreground md:text-xl">
-          {word.ipa}
-        </p>
-      )}
-
-      {word.example && back && (
-        <div className="mt-5 w-full max-w-lg rounded-xl border-2 border-primary bg-storybook-green p-4 text-center md:p-5">
-          <p className="text-base font-bold italic leading-relaxed text-foreground md:text-xl">"{word.example}"</p>
+      <div className="flex w-full items-start justify-between p-4 md:p-6 pb-0 md:pb-0">
+        <div>
+          {word.partOfSpeech && (
+            <Badge tone="muted" className="border-border shadow-sm">
+              {word.partOfSpeech}
+            </Badge>
+          )}
         </div>
-      )}
+        {audioButton()}
+      </div>
 
-      {Array.isArray(word.synonyms) && word.synonyms.length > 0 && !back && (
-        <div className="absolute bottom-5 left-5 right-5 rounded-xl border-2 border-border bg-white p-3 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <h2 className="font-secondary text-5xl font-black tracking-tight text-foreground md:text-7xl">
+          {word.word}
+        </h2>
+        {word.ipa && (
+          <p className="mt-3 font-mono text-lg font-medium text-muted-foreground md:text-xl">
+            {word.ipa}
+          </p>
+        )}
+        
+        {word.example && back && (
+          <div className="mt-6 w-full max-w-sm rounded-xl bg-storybook-green/30 p-4">
+            <p className="text-base font-bold italic leading-relaxed text-foreground md:text-lg">"{word.example}"</p>
+          </div>
+        )}
+      </div>
+
+      {Array.isArray(word.synonyms) && word.synonyms.length > 0 && !back ? (
+        <div className="border-t-2 border-border/50 bg-muted/30 p-4 text-center rounded-b-xl">
           <p className="text-sm font-medium text-foreground/80">
-            <span className="mr-2 font-bold text-primary">Từ gần nghĩa:</span>{word.synonyms.join(', ')}
+            <span className="mr-2 font-bold text-primary">Từ gần nghĩa:</span>
+            {word.synonyms.join(', ')}
           </p>
         </div>
+      ) : (
+        <div className="h-4 md:h-6" /> // spacer to keep center balanced
       )}
     </div>
   );
 
   const meaningCard = (back = false) => (
     <div
-      className="absolute inset-0 flex flex-col items-center justify-center rounded-xl border-2 border-primary bg-primary p-5 [backface-visibility:hidden] md:p-8"
+      className="absolute inset-0 flex flex-col rounded-xl border-2 border-border bg-card shadow-[4px_4px_0_0_rgba(0,0,0,0.05)] [backface-visibility:hidden]"
       style={back ? { transform: 'rotateY(180deg)' } : undefined}
     >
-      {!back && reverseMode ? null : audioButton(true)}
+      <div className="flex w-full items-start justify-end p-4 md:p-6 pb-0 md:pb-0">
+        {!back && reverseMode ? <div className="h-10" /> : audioButton()}
+      </div>
 
-      <h3 className="mb-5 text-center text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
-        {word.meaning}
-      </h3>
+      <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <h3 className="text-3xl font-black leading-tight tracking-tight text-primary md:text-5xl">
+          {word.meaning}
+        </h3>
 
-      {word.example && !reverseMode && (
-        <div className="w-full max-w-lg rounded-xl border-2 border-white bg-white/15 p-4 text-center md:p-5">
-          <p className="text-base font-bold italic leading-relaxed text-white md:text-xl">"{word.example}"</p>
-        </div>
-      )}
+        {word.example && !reverseMode && (
+          <div className="mt-6 w-full max-w-sm rounded-xl border-2 border-border border-l-primary border-l-4 bg-muted/40 p-4 text-left shadow-sm">
+            <p className="text-base font-bold italic leading-relaxed text-foreground md:text-lg text-center">
+              "{word.example}"
+            </p>
+          </div>
+        )}
 
-      {reverseMode && !showHint && (
-        <button
-          onClick={(event) => {
-            event.stopPropagation();
-            setShowHint(true);
-          }}
-          className="mt-4 flex min-h-11 items-center gap-3 rounded-xl border-2 border-white bg-white/15 px-6 py-3 font-bold text-white transition-transform hover:scale-105 active:scale-95"
-          type="button"
-        >
-          <Lightbulb className="h-6 w-6 text-[#fff9da]" />
-          Gợi ý nhẹ
-        </button>
-      )}
+        {reverseMode && !showHint && (
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              setShowHint(true);
+            }}
+            className="mt-6 flex min-h-11 items-center gap-2 rounded-xl border-2 border-border bg-muted px-6 py-2.5 font-bold text-foreground transition-transform hover:scale-105 active:scale-95 shadow-sm"
+            type="button"
+          >
+            <Lightbulb className="h-5 w-5 text-accent" />
+            Gợi ý nhẹ
+          </button>
+        )}
 
-      {reverseMode && showHint && (
-        <div className="mt-4 rounded-xl border-2 border-white bg-white/15 p-4">
-          <p className="font-mono text-2xl font-bold tracking-[0.35em] text-white md:text-3xl">
-            {word.word[0].toUpperCase()}{Array(Math.max(word.word.length - 1, 0)).fill('_').join(' ')}
-          </p>
-        </div>
-      )}
+        {reverseMode && showHint && (
+          <div className="mt-6 rounded-xl border-2 border-border bg-muted/40 p-4 shadow-sm">
+            <p className="font-mono text-2xl font-bold tracking-[0.35em] text-foreground md:text-3xl">
+              {word.word[0].toUpperCase()}{Array(Math.max(word.word.length - 1, 0)).fill('_').join(' ')}
+            </p>
+          </div>
+        )}
+      </div>
+      
+      <div className="h-4 md:h-6" />
     </div>
   );
 

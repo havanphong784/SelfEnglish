@@ -13,6 +13,7 @@ import {
   StudyHeader,
   StudyLoadError,
   StudyLoading,
+  ShortcutsPanel,
 } from './StudySessionChrome';
 import { useStudySession } from './useStudySession';
 
@@ -65,7 +66,7 @@ const StudyController = () => {
   }
 
   return (
-    <div className="se-shell grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
+    <div className="se-shell pt-4  pt-4 md:pt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
       <section className="min-w-0">
         <StudyHeader
           currentIndex={currentIndex}
@@ -90,6 +91,7 @@ const StudyController = () => {
       <aside className="space-y-3 xl:sticky xl:top-3 xl:self-start">
         <SessionLedger summary={summary} totalWords={words.length} />
         <LevelPanel level={currentLevel} />
+        <ShortcutsPanel />
       </aside>
     </div>
   );

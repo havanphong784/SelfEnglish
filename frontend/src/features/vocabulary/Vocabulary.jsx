@@ -42,7 +42,7 @@ const Vocabulary = () => {
   };
 
   return (
-    <div className="se-shell max-w-4xl space-y-8">
+    <div className="se-shell pt-4  max-w-4xl space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="se-page-title">Học từ vựng</h1>
         <Button>

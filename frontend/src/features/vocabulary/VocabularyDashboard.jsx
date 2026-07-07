@@ -9,7 +9,7 @@ import { Badge, Button, IconSticker, PageHeader, Panel, ProgressBar, StatCard } 
 const VocabularyDashboard = () => {
   const [packages, setPackages] = useState([]);
   const [reviewCount, setReviewCount] = useState(0);
-  const [stats, setStats] = useState({ streak: 0, todayLearned: 0, levelDistribution: {} });
+  const [stats, setStats] = useState({ streak: 0, todayNewWords: 0, levelDistribution: {} });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -68,7 +68,7 @@ const VocabularyDashboard = () => {
   }
 
   return (
-    <div className="se-shell space-y-8 pb-12">
+    <div className="se-shell pt-4  space-y-8 pb-12">
       <PageHeader
         eyebrow="Từ vựng mỗi ngày"
         icon={Sparkles}
@@ -85,7 +85,7 @@ const VocabularyDashboard = () => {
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard label="Chuỗi học" value={stats.streak || 0} detail="Ngày liên tiếp" icon={Flame} tone="warning" />
-        <StatCard label="Từ mới" value={stats.todayLearned || 0} detail="Đã học hôm nay" icon={Target} tone="green" />
+        <StatCard label="Từ mới" value={stats.todayNewWords ?? stats.todayLearned ?? 0} detail="Học mới hôm nay" icon={Target} tone="green" />
         <StatCard label="Thành thạo" value={stats.levelDistribution?.[6] || 0} detail="Từ đã nắm chắc" icon={Crown} tone="default" />
         <StatCard label="Cần ôn" value={reviewCount} detail="Đến lịch hôm nay" icon={Clock} tone="blue" />
       </div>
@@ -146,7 +146,8 @@ const VocabularyDashboard = () => {
 };
 
 const PackageCard = ({ pkg, index, onClick }) => {
-  const progress = (pkg.totalWords || 0) > 0 ? ((pkg.learnedWords || 0) / pkg.totalWords) * 100 : 0;
+  const startedWords = pkg.startedWords ?? pkg.learnedWords ?? 0;
+  const progress = (pkg.totalWords || 0) > 0 ? (startedWords / pkg.totalWords) * 100 : 0;
 
   return (
     <motion.button
@@ -185,8 +186,8 @@ const PackageCard = ({ pkg, index, onClick }) => {
 
       <div className="mt-6 space-y-3">
         <div className="flex justify-between text-xs font-black uppercase tracking-[0.08em] text-muted-foreground">
-          <span>Tiến độ học</span>
-          <span className="text-foreground">{pkg.learnedWords || 0} / {pkg.totalWords || 0}</span>
+          <span>Đã bắt đầu</span>
+          <span className="text-foreground">{startedWords} / {pkg.totalWords || 0}</span>
         </div>
         <ProgressBar value={progress} />
       </div>
