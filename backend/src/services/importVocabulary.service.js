@@ -29,7 +29,6 @@ const buildImportPackageData = ({ title, description, level, userId, now = new D
 };
 
 module.exports = {
-  toStringOrNull,
   normalizeImportedWord,
   buildImportPackageData,
 };

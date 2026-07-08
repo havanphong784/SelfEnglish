@@ -10,9 +10,9 @@ const ImportVocabulary = () => {
   const [title, setTitle] = useState('');
   const [wordsPreview, setWordsPreview] = useState([]);
   const [error, setError] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+  const handleVocabularyFile = (file) => {
     if (!file) return;
 
     setError(null);
@@ -47,6 +47,25 @@ const ImportVocabulary = () => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleFileUpload = (e) => {
+    handleVocabularyFile(e.target.files[0]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleVocabularyFile(e.dataTransfer.files[0]);
   };
 
   const handleSubmit = async (e) => {
@@ -118,7 +137,12 @@ const ImportVocabulary = () => {
 
           <div className="space-y-4">
             <label className="se-label mb-2">File từ vựng</label>
-            <label className="block w-full cursor-pointer rounded-xl border-2 border-dashed border-primary bg-storybook-green py-10 text-center text-foreground transition-transform hover:-translate-y-1">
+            <label
+              className={`block w-full cursor-pointer rounded-xl border-2 border-dashed py-10 text-center text-foreground transition-transform hover:-translate-y-1 ${isDragging ? 'border-accent bg-white shadow-[0_8px_0_#111827]' : 'border-primary bg-storybook-green'}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <div className="flex flex-col items-center gap-3">
                 <Upload className="w-10 h-10 mb-1" />
                 <span className="text-lg font-black">Tải file JSON lên</span>

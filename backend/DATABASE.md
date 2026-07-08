@@ -3,7 +3,7 @@
 Source of truth:
 
 - Prisma schema: `prisma/schema.prisma`
-- Reset seed: `prisma/seed.js`
+- Reset seed: `src/scripts/seed.js`
 - Seed command: `npm run db:seed`
 - App tables: `User`, `VocabularyPackage`, `Vocabulary`, `UserVocabulary`, `StudySession`, `ReviewHistory`
 

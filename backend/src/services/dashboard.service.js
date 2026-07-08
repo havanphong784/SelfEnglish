@@ -58,8 +58,6 @@ const getRecentStudyQueryStart = (now = new Date(), timeZone = STUDY_TIME_ZONE) 
 };
 
 module.exports = {
-  RECENT_STUDY_DAY_COUNT,
-  STUDY_TIME_ZONE,
   buildRecentStudyDays,
   getRecentStudyQueryStart,
 };

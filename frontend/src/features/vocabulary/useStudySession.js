@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { fetchWithAuth } from '../../utils/api';
 
@@ -38,6 +38,8 @@ const studyReducer = (state, action) => {
       };
     case 'load:error':
       return { ...initialStudyState, loading: false, error: action.error };
+    case 'session:resume-prompt':
+      return { ...initialStudyState, loading: false };
     case 'session:resume':
       return {
         ...initialStudyState,
@@ -111,6 +113,7 @@ const getModeLabel = (mode, packageId) => {
 
 export const useStudySession = ({ packageId, mode }) => {
   const [state, dispatch] = useReducer(studyReducer, initialStudyState);
+  const [pendingResumeSession, setPendingResumeSession] = useState(null);
   const { words, currentIndex, isFinished, outcomes } = state;
   const outcomesRef = useRef(null);
   const sessionStartRef = useRef(null);
@@ -162,6 +165,7 @@ export const useStudySession = ({ packageId, mode }) => {
   }, [mode, packageId, resetSessionRefs]);
 
   useEffect(() => {
+    setPendingResumeSession(null);
     LEGACY_STUDY_SESSION_STORAGE_KEYS.forEach((key) => sessionStorage.removeItem(key));
 
     const savedSessionStr = sessionStorage.getItem(STUDY_SESSION_STORAGE_KEY);
@@ -174,26 +178,20 @@ export const useStudySession = ({ packageId, mode }) => {
           && Array.isArray(savedSession.words)
           && savedSession.words.length > 0
         ) {
-          if (window.confirm('Bạn có phiên học dang dở, muốn tiếp tục không?')) {
-            const safeIndex = Math.min(
-              Math.max(Number(savedSession.currentIndex) || 0, 0),
-              savedSession.words.length - 1,
-            );
-            const savedOutcomes = savedSession.outcomes || {};
+          const safeIndex = Math.min(
+            Math.max(Number(savedSession.currentIndex) || 0, 0),
+            savedSession.words.length - 1,
+          );
 
-            outcomesRef.current = savedOutcomes;
-            sessionStartRef.current = savedSession.startedAt || Date.now();
-            countsNewWordsRef.current = savedSession.countsNewWords ?? isNewWordSession(mode, packageId);
-            dispatch({
-              type: 'session:resume',
-              words: savedSession.words,
-              currentIndex: safeIndex,
-              outcomes: savedOutcomes,
-            });
-            return;
-          }
-
-          sessionStorage.removeItem(STUDY_SESSION_STORAGE_KEY);
+          setPendingResumeSession({
+            words: savedSession.words,
+            currentIndex: safeIndex,
+            outcomes: savedSession.outcomes || {},
+            startedAt: savedSession.startedAt,
+            countsNewWords: savedSession.countsNewWords,
+          });
+          dispatch({ type: 'session:resume-prompt' });
+          return;
         }
       } catch (parseError) {
         console.error('Lỗi đọc phiên học đã lưu:', parseError);
@@ -203,6 +201,27 @@ export const useStudySession = ({ packageId, mode }) => {
 
     loadStudySession();
   }, [loadStudySession, packageId, mode]);
+
+  const resumeSavedSession = useCallback(() => {
+    if (!pendingResumeSession) return;
+
+    outcomesRef.current = pendingResumeSession.outcomes;
+    sessionStartRef.current = pendingResumeSession.startedAt || Date.now();
+    countsNewWordsRef.current = pendingResumeSession.countsNewWords ?? isNewWordSession(mode, packageId);
+    dispatch({
+      type: 'session:resume',
+      words: pendingResumeSession.words,
+      currentIndex: pendingResumeSession.currentIndex,
+      outcomes: pendingResumeSession.outcomes,
+    });
+    setPendingResumeSession(null);
+  }, [mode, packageId, pendingResumeSession]);
+
+  const discardSavedSession = useCallback(() => {
+    sessionStorage.removeItem(STUDY_SESSION_STORAGE_KEY);
+    setPendingResumeSession(null);
+    void loadStudySession();
+  }, [loadStudySession]);
 
   useEffect(() => {
     if (words.length > 0 && !isFinished) {
@@ -363,5 +382,8 @@ export const useStudySession = ({ packageId, mode }) => {
     handleResult,
     retryLoad,
     retryMissedWords,
+    pendingResumeSession,
+    resumeSavedSession,
+    discardSavedSession,
   };
 };

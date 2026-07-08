@@ -78,6 +78,13 @@ const PackageDetails = () => {
   if (!details) return <div className="p-8 text-center font-bold text-danger">Không tìm thấy dữ liệu</div>;
 
   const startedWords = details.startedWords ?? details.learnedWords ?? 0;
+  const canMarkMastered = (word) => word.level > 0 && word.level < 6;
+  const formatNextReview = (nextReview) => nextReview
+    ? new Date(nextReview).toLocaleDateString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    })
+    : '-';
 
   const renderProgressBar = () => {
     const total = details.totalWords;
@@ -161,7 +168,45 @@ const PackageDetails = () => {
 
       <div className="space-y-4">
         <h2 className="se-heading text-[clamp(30px,4vw,44px)]">Từ trong gói</h2>
-        <Panel className="overflow-x-auto p-0">
+        <div className="grid gap-3 md:hidden">
+          {details.words.map(w => (
+            <Panel key={w.id} className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="break-words font-secondary text-xl font-black text-foreground">{w.word}</div>
+                  <div className="mt-1 text-sm font-bold text-muted-foreground">{w.ipa}</div>
+                </div>
+                {w.level > 0 ? (
+                  <span className={`shrink-0 rounded-xl border-2 px-3 py-1 text-[10px] font-black uppercase tracking-widest ${LEVEL_BADGES[w.level]}`}>
+                    {w.level === 6 ? 'Thành thạo' : `Mức ${w.level}`}
+                  </span>
+                ) : (
+                  <Badge>Chưa học</Badge>
+                )}
+              </div>
+
+              <p className="mt-3 break-words text-base font-bold text-foreground">{w.meaning}</p>
+              <div className="mt-3 text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                Lần ôn tiếp: <span className="text-foreground">{formatNextReview(w.nextReview)}</span>
+              </div>
+
+              {canMarkMastered(w) && (
+                <Button
+                  onClick={() => handleMaster(w.id)}
+                  disabled={masteringId === w.id}
+                  variant="soft"
+                  size="sm"
+                  className="mt-4 w-full"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Mình nhớ rồi
+                </Button>
+              )}
+            </Panel>
+          ))}
+        </div>
+
+        <Panel className="hidden overflow-x-auto p-0 md:block">
           <table className="se-table min-w-[880px]">
             <thead>
               <tr>
@@ -190,13 +235,10 @@ const PackageDetails = () => {
                     )}
                   </td>
                   <td className="text-center text-sm font-bold text-muted-foreground">
-                    {w.nextReview ? new Date(w.nextReview).toLocaleDateString('vi-VN', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                      hour: '2-digit', minute: '2-digit'
-                    }) : '-'}
+                    {formatNextReview(w.nextReview)}
                   </td>
                   <td className="text-right">
-                    {w.level < 6 && (
+                    {canMarkMastered(w) && (
                       <Button
                         onClick={() => handleMaster(w.id)}
                         disabled={masteringId === w.id}

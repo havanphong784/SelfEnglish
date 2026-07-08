@@ -13,6 +13,7 @@ import {
   StudyHeader,
   StudyLoadError,
   StudyLoading,
+  ResumeSessionPrompt,
   ShortcutsPanel,
 } from './StudySessionChrome';
 import { useStudySession } from './useStudySession';
@@ -44,12 +45,25 @@ const StudyController = () => {
     handleResult,
     retryLoad,
     retryMissedWords,
+    pendingResumeSession,
+    resumeSavedSession,
+    discardSavedSession,
   } = useStudySession({ packageId, mode });
 
   const currentWord = words[currentIndex];
   const currentLevel = currentWord?.level || 1;
   const StudyComponent = getStudyComponent(currentLevel);
 
+  if (pendingResumeSession) {
+    return (
+      <ResumeSessionPrompt
+        session={pendingResumeSession}
+        onResume={resumeSavedSession}
+        onDiscard={discardSavedSession}
+        onBack={goBack}
+      />
+    );
+  }
   if (loading) return <StudyLoading />;
   if (error && words.length === 0) return <StudyLoadError error={error} onRetry={retryLoad} onBack={goBack} />;
   if (words.length === 0) return <EmptyStudyState onBack={goBack} />;
@@ -66,7 +80,7 @@ const StudyController = () => {
   }
 
   return (
-    <div className="se-shell pt-4  pt-4 md:pt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
+    <div className="se-shell pt-4 md:pt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
       <section className="min-w-0">
         <StudyHeader
           currentIndex={currentIndex}
@@ -91,7 +105,9 @@ const StudyController = () => {
       <aside className="space-y-3 xl:sticky xl:top-3 xl:self-start">
         <SessionLedger summary={summary} totalWords={words.length} />
         <LevelPanel level={currentLevel} />
-        <ShortcutsPanel />
+        <div className="hidden xl:block">
+          <ShortcutsPanel />
+        </div>
       </aside>
     </div>
   );

@@ -102,7 +102,20 @@ const MultipleChoiceStudy = ({ word, onNext, onMaster, disabled = false }) => {
   }, []);
 
   if (isLoadingOptions) {
-    return <div className="py-10 text-center font-bold text-muted-foreground">Đang tạo câu hỏi cho bạn...</div>;
+    return (
+      <Panel className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto mb-8 h-14 w-44 animate-pulse rounded-xl border-2 border-primary bg-storybook-green" />
+        <div className="grid gap-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div
+              key={item}
+              className="h-[68px] animate-pulse rounded-xl border-2 border-border bg-muted"
+            />
+          ))}
+        </div>
+        <p className="mt-6 font-bold text-muted-foreground">Đang tạo câu hỏi cho bạn...</p>
+      </Panel>
+    );
   }
 
   if (options.length < 2) {

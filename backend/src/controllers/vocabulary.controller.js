@@ -235,9 +235,7 @@ exports.getRandomVocabularies = async (req, res, next) => {
     const userId = req.user.id;
     const { excludeId, limit = 3, partOfSpeech, excludeSynonyms } = req.query;
 
-    let parsedLimit = parseInt(limit, 10);
-    if (Number.isNaN(parsedLimit) || parsedLimit <= 0) parsedLimit = 3;
-    parsedLimit = Math.min(parsedLimit, 10);
+    const parsedLimit = limit;
 
     let synonymsArray = [];
     if (excludeSynonyms) {

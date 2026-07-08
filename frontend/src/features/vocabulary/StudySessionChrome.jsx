@@ -1,6 +1,36 @@
 import { AlertTriangle, ArrowLeft, BookOpen, RotateCcw, Target, Trophy } from 'lucide-react';
 import { Button, IconSticker, Kbd, Panel, ProgressBar } from '../../components/ui/Primitives';
 
+export const ResumeSessionPrompt = ({ session, onResume, onDiscard, onBack }) => {
+  const answeredCount = Object.keys(session?.outcomes || {}).length;
+  const totalWords = session?.words?.length || 0;
+
+  return (
+    <Panel className="mx-auto mt-20 max-w-xl space-y-6 text-center">
+      <IconSticker icon={RotateCcw} className="mx-auto border-primary bg-storybook-green text-primary" />
+      <div>
+        <h2 className="text-2xl font-black text-foreground">Tiếp tục phiên đang học?</h2>
+        <p className="mx-auto mt-3 max-w-md font-bold leading-relaxed text-muted-foreground">
+          Bạn còn phiên học dở với {totalWords} từ, đã làm {answeredCount} từ.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Button onClick={onResume}>
+          <RotateCcw className="h-4 w-4" />
+          Tiếp tục
+        </Button>
+        <Button onClick={onDiscard} variant="secondary">
+          Bắt đầu lại
+        </Button>
+      </div>
+      <Button onClick={onBack} variant="ghost" className="mx-auto">
+        <BookOpen className="h-4 w-4" />
+        Kho từ
+      </Button>
+    </Panel>
+  );
+};
+
 export const StudyLoading = () => (
   <div className="py-12 text-center font-bold text-muted-foreground">Đang chuẩn bị phiên học...</div>
 );

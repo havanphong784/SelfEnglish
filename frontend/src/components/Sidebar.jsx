@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart, BookOpen, CheckSquare, Headphones, Home, Mic, Settings, Users } from 'lucide-react';
+import { BarChart, BookOpen, CheckSquare, Headphones, Home, Mic } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 
@@ -10,8 +10,6 @@ const menuItems = [
   { icon: Mic, path: '/dashboard/speaking', label: 'Nói' },
   { icon: CheckSquare, path: '/dashboard/exams', label: 'Đề thi' },
   { icon: BarChart, path: '/dashboard/statistics', label: 'Tiến độ' },
-  { icon: Users, path: '/dashboard/community', label: 'Bạn học' },
-  { icon: Settings, path: '/dashboard/settings', label: 'Cài đặt' },
 ];
 
 const isActivePath = (pathname, path) => (
