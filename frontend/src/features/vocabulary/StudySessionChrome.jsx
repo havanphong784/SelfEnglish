@@ -88,7 +88,7 @@ const SummaryTile = ({ label, value, detail, tone = 'default' }) => {
   );
 };
 
-export const FinishedStudy = ({ error, summary, retryCount, onRetryMissed, onBack }) => (
+export const FinishedStudy = ({ error, summary, retryCount, onRetryMissed, onPracticeAgain, onBack }) => (
   <div className="mx-auto mt-10 max-w-4xl space-y-6">
     <Panel className="text-center">
       <IconSticker icon={Trophy} className="mx-auto mb-6 h-20 w-20 border-primary bg-storybook-green text-primary" />
@@ -119,6 +119,15 @@ export const FinishedStudy = ({ error, summary, retryCount, onRetryMissed, onBac
         >
           <RotateCcw className="h-5 w-5" />
           Ôn lại {retryCount} từ chưa chắc
+        </Button>
+      )}
+      {onPracticeAgain && (
+        <Button
+          onClick={onPracticeAgain}
+          variant={retryCount > 0 ? 'secondary' : 'primary'}
+        >
+          <RotateCcw className="h-5 w-5" />
+          Ôn tiếp 20 từ khác
         </Button>
       )}
       <Button

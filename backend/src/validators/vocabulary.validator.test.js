@@ -1,4 +1,4 @@
-const { importBody, reviewBody } = require('./vocabulary.validator');
+const { importBody, practiceQuery, reviewBody } = require('./vocabulary.validator');
 
 describe('vocabulary.validator', () => {
   it('rejects review payloads without boolean isCorrect', () => {
@@ -20,5 +20,16 @@ describe('vocabulary.validator', () => {
       meaning: 'Hoc',
       synonyms: [],
     });
+  });
+
+  it('parses practice exclude ids as a UUID list', () => {
+    const firstId = '00000000-0000-4000-8000-000000000001';
+    const secondId = '00000000-0000-4000-8000-000000000002';
+
+    expect(practiceQuery.parse({})).toEqual({ excludeIds: [] });
+    expect(practiceQuery.parse({ excludeIds: `${firstId}, ${secondId}` })).toEqual({
+      excludeIds: [firstId, secondId],
+    });
+    expect(() => practiceQuery.parse({ excludeIds: 'not-a-uuid' })).toThrow();
   });
 });

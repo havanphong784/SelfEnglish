@@ -4,6 +4,7 @@ import { fetchWithAuth } from '../../utils/api';
 
 const STUDY_SESSION_STORAGE_KEY = 'currentStudySession:v2';
 const LEGACY_STUDY_SESSION_STORAGE_KEYS = ['currentStudySession', 'currentStudySession:v1'];
+const PRACTICE_SEEN_STORAGE_PREFIX = 'practiceSeenVocabularyIds:v1:';
 
 const initialStudyState = {
   words: [],
@@ -111,6 +112,34 @@ const getModeLabel = (mode, packageId) => {
   return 'Từ mới';
 };
 
+const getPracticeSeenStorageKey = (packageId) => `${PRACTICE_SEEN_STORAGE_PREFIX}${packageId}`;
+
+const readPracticeSeenIds = (packageId) => {
+  if (!packageId) return [];
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(getPracticeSeenStorageKey(packageId)) || '[]');
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+};
+
+const rememberPracticeWords = (packageId, words) => {
+  if (!packageId || words.length === 0) return;
+
+  const seenIds = readPracticeSeenIds(packageId);
+  const nextSeenIds = [...new Set([...seenIds, ...words.map((word) => word.id)])];
+  sessionStorage.setItem(getPracticeSeenStorageKey(packageId), JSON.stringify(nextSeenIds));
+};
+
+const resetPracticeSeenIds = (packageId, words) => {
+  if (!packageId) return;
+  sessionStorage.setItem(
+    getPracticeSeenStorageKey(packageId),
+    JSON.stringify(words.map((word) => word.id)),
+  );
+};
+
 export const useStudySession = ({ packageId, mode }) => {
   const [state, dispatch] = useReducer(studyReducer, initialStudyState);
   const [pendingResumeSession, setPendingResumeSession] = useState(null);
@@ -146,7 +175,20 @@ export const useStudySession = ({ packageId, mode }) => {
     try {
       let data = [];
       if (mode === 'practice' && packageId) {
-        data = await fetchWithAuth(`/vocabularies/packages/${packageId}/practice`);
+        const excludeIds = readPracticeSeenIds(packageId);
+        const query = excludeIds.length > 0
+          ? `?excludeIds=${encodeURIComponent(excludeIds.join(','))}`
+          : '';
+
+        data = await fetchWithAuth(`/vocabularies/packages/${packageId}/practice${query}`);
+        if (Array.isArray(data) && data.length > 0) {
+          const returnedSeenWord = data.some((word) => excludeIds.includes(word.id));
+          if (returnedSeenWord) {
+            resetPracticeSeenIds(packageId, data);
+          } else {
+            rememberPracticeWords(packageId, data);
+          }
+        }
       } else if (packageId) {
         data = await fetchWithAuth(`/vocabularies/packages/${packageId}/learn`);
       } else {
@@ -373,6 +415,12 @@ export const useStudySession = ({ packageId, mode }) => {
     dispatch({ type: 'session:retry-missed', words: nextWords });
   }, [resetSessionRefs, words]);
 
+  const loadAnotherPracticeRound = useCallback(() => {
+    if (mode !== 'practice' || !packageId) return;
+    sessionStorage.removeItem(STUDY_SESSION_STORAGE_KEY);
+    void loadStudySession();
+  }, [loadStudySession, mode, packageId]);
+
   return {
     ...state,
     summary,
@@ -382,6 +430,7 @@ export const useStudySession = ({ packageId, mode }) => {
     handleResult,
     retryLoad,
     retryMissedWords,
+    loadAnotherPracticeRound,
     pendingResumeSession,
     resumeSavedSession,
     discardSavedSession,

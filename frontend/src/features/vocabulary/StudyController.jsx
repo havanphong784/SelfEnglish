@@ -45,6 +45,7 @@ const StudyController = () => {
     handleResult,
     retryLoad,
     retryMissedWords,
+    loadAnotherPracticeRound,
     pendingResumeSession,
     resumeSavedSession,
     discardSavedSession,
@@ -53,6 +54,11 @@ const StudyController = () => {
   const currentWord = words[currentIndex];
   const currentLevel = currentWord?.level || 1;
   const StudyComponent = getStudyComponent(currentLevel);
+  const handlePracticeAgain = mode === 'practice'
+    ? loadAnotherPracticeRound
+    : packageId
+      ? () => navigate(`/dashboard/vocabulary/study?packageId=${packageId}&mode=practice`)
+      : null;
 
   if (pendingResumeSession) {
     return (
@@ -74,6 +80,7 @@ const StudyController = () => {
         summary={summary}
         retryCount={retryWords.length}
         onRetryMissed={retryMissedWords}
+        onPracticeAgain={handlePracticeAgain}
         onBack={goBack}
       />
     );

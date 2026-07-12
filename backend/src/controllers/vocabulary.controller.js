@@ -26,6 +26,9 @@ const formatVocabulary = (vocabulary, level = 1) => ({
 });
 
 const STUDY_SESSION_WORD_LIMIT = 10;
+const PRACTICE_SESSION_WORD_LIMIT = 20;
+
+const shuffle = (items) => [...items].sort(() => 0.5 - Math.random());
 
 exports.getPackages = async (req, res, next) => {
   try {
@@ -507,6 +510,7 @@ exports.getPackageDetails = async (req, res, next) => {
 exports.practicePackage = async (req, res, next) => {
   try {
     const { packageId } = req.params;
+    const { excludeIds = [] } = req.query;
     const userId = req.user.id;
 
     const pkg = await findAccessiblePackage(packageId, userId);
@@ -514,20 +518,38 @@ exports.practicePackage = async (req, res, next) => {
       return res.status(404).json({ error: 'Khong tim thay goi tu vung' });
     }
 
-    const learned = await prisma.vocabulary.findMany({
+    const baseWhere = {
+      packageId,
+      userVocabularies: {
+        some: { userId, level: { gt: 0 } },
+      },
+    };
+
+    const preferredWords = await prisma.vocabulary.findMany({
       where: {
-        packageId,
-        userVocabularies: {
-          some: { userId, level: { gt: 0 } },
-        },
+        ...baseWhere,
+        ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
       },
       include: {
         userVocabularies: {
           where: { userId },
         },
       },
-      take: STUDY_SESSION_WORD_LIMIT,
     });
+
+    let learned = shuffle(preferredWords).slice(0, PRACTICE_SESSION_WORD_LIMIT);
+
+    if (learned.length === 0 && excludeIds.length > 0) {
+      const fallbackWords = await prisma.vocabulary.findMany({
+        where: baseWhere,
+        include: {
+          userVocabularies: {
+            where: { userId },
+          },
+        },
+      });
+      learned = shuffle(fallbackWords).slice(0, PRACTICE_SESSION_WORD_LIMIT);
+    }
 
     res.json(learned.map((vocabulary) => (
       formatVocabulary(vocabulary, vocabulary.userVocabularies[0].level)

@@ -20,7 +20,10 @@ router.get(
 );
 router.get(
   '/packages/:packageId/practice',
-  validate({ params: vocabularyValidator.packageParam }),
+  validate({
+    params: vocabularyValidator.packageParam,
+    query: vocabularyValidator.practiceQuery,
+  }),
   vocabularyController.practicePackage,
 );
 

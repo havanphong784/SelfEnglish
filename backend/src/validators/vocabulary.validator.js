@@ -8,6 +8,14 @@ const packageParam = z.object({
   packageId: z.string().uuid(),
 });
 
+const uuidList = z.string().trim().optional().transform((value) => {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}).pipe(z.array(z.string().uuid()).max(200));
+
 const reviewBody = z.object({
   isCorrect: z.boolean(),
 }).strict();
@@ -44,6 +52,10 @@ const randomQuery = z.object({
   excludeSynonyms: z.string().trim().optional(),
 });
 
+const practiceQuery = z.object({
+  excludeIds: uuidList.default([]),
+});
+
 module.exports = {
   uuidParam,
   packageParam,
@@ -52,4 +64,5 @@ module.exports = {
   sessionBody,
   scheduleQuery,
   randomQuery,
+  practiceQuery,
 };
