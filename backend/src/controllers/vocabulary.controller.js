@@ -30,6 +30,15 @@ const PRACTICE_SESSION_WORD_LIMIT = 20;
 
 const shuffle = (items) => [...items].sort(() => 0.5 - Math.random());
 
+const parseIdList = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value !== 'string') return [];
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
 exports.getPackages = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -510,7 +519,7 @@ exports.getPackageDetails = async (req, res, next) => {
 exports.practicePackage = async (req, res, next) => {
   try {
     const { packageId } = req.params;
-    const { excludeIds = [] } = req.query;
+    const excludeIds = parseIdList(req.query.excludeIds);
     const userId = req.user.id;
 
     const pkg = await findAccessiblePackage(packageId, userId);
